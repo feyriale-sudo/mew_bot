@@ -146,7 +146,7 @@ async def design_embed(
     elif isinstance(color, discord.Colour):
         embed.color = color
     else:
-        embed.color = 11500229
+        embed.color = 16744613
 
     return embed
 

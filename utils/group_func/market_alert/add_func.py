@@ -137,7 +137,7 @@ async def add_market_alert_func(
         f"- **Channel:** {channel.mention}",
     ]
     if role_id:
-        desc_lines.append(f"- Role: {role_mention}")
+        desc_lines.append(f"- **Role:** {role_mention}")
 
     full_desc = "\n".join(desc_lines)
 
@@ -166,7 +166,7 @@ async def add_market_alert_func(
             f"- **Channel:** {channel.mention}",
         ]
         if role_id:
-            desc_lines.append(f"- Role: {role_mention}")
+            desc_lines.append(f"- **Role:** {role_mention}")
 
         full_desc = "\n".join(desc_lines)
         log_embed = discord.Embed(

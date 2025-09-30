@@ -196,7 +196,7 @@ async def remove_market_alert_func(bot, interaction: discord.Interaction, pokemo
         )
         log_embed = discord.Embed(
             title=f"Market Alert Removed",
-            description=f"{status_message}\n-Member: {user.mention}\n- Pokemon:\n{log_description}",
+            description=f"{status_message}\n- Member: {user.mention}\n- Pokemon:\n{log_description}",
             color=0xFF80A5,
             timestamp=datetime.now(),
         )
