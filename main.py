@@ -5,15 +5,17 @@ import asyncio
 import glob
 import logging
 import os
+import random
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
 
+from utils.cache.centralized_cache import load_all_caches
 from utils.db.get_pg_pool import *
 from utils.logs.pretty_log import pretty_log, set_mew_bot
-from utils.cache.centralized_cache import load_all_caches
-
 
 # ❀───────────────────────────────❀
 #       💖  Suppress Logs  💖
@@ -61,6 +63,46 @@ async def on_command_error(ctx, error):
     )
 
 
+ASIA_SINGAPORE = ZoneInfo("Asia/Singapore")
+
+
+# 🌸───────────────────────────────────────────────🌸
+# 💖 Mew Status Rotations (Skaia + Market themed) 💖
+# 🌸───────────────────────────────────────────────🌸
+
+MEW_MORNING_STATUSES = [
+    (discord.ActivityType.playing, "with Skaia's hair ˚₊⊹♡"),
+    (discord.ActivityType.playing, "with Skaia's morning coffee ₊˚☕︵♡"),
+    (discord.ActivityType.playing, "with Skaia’s Mew shopping list ⋆｡˚🛒♡"),
+    (discord.ActivityType.playing, "with pink reminders for Skaia ୨୧₊˚♡"),
+    (discord.ActivityType.listening, "to Skaia’s soft alarm chimes ⋆｡˚🔔⊹♡"),
+    (discord.ActivityType.watching, "over Skaia’s busy timers ˚₊· ͟͟͞͞➳♡"),
+    (discord.ActivityType.playing, "with reminders as bright as Skaia ˚ʚ♡ɞ˚"),
+]
+
+MEW_NIGHT_STATUSES = [
+    (discord.ActivityType.playing, "with starlit reminders for Skaia ⋆˙⟡♡"),
+    (discord.ActivityType.playing, "with pink dreams in the market ｡˚୨୧˚｡"),
+    (discord.ActivityType.playing, "with quiet timers as Skaia rests ₊˚✧ ﾟ."),
+    (discord.ActivityType.listening, "to Skaia’s sleepy reminders ₊˚.⋆𐙚₊˚⊹♡"),
+    (discord.ActivityType.watching, "over Skaia’s night market alerts ｡ﾟ•┈୨♡୧┈•ﾟ｡"),
+    (discord.ActivityType.playing, "with starry timers and pink wishes ⊹₊ ⊹⋆˚｡𖦹"),
+]
+
+MEW_DEFAULT_STATUSES = [
+    (discord.ActivityType.watching, "everyday alerts for Skaia ｡･:*:･ﾟ★,｡･:*:･ﾟ☆"),
+    (discord.ActivityType.listening, "to Skaia’s reminder bells ♡₊˚︶꒷🎀꒷︶˚₊♡"),
+    (discord.ActivityType.watching, "Skaia shop for Mews at the market 𓆩♡𓆪"),
+    (discord.ActivityType.listening, "to whispers of the market ₊˚⊹♡₊˚⊹"),
+]
+
+
+def pick_status_tuple():
+    now = datetime.now(ASIA_SINGAPORE)
+    pool = MEW_MORNING_STATUSES if 6 <= now.hour < 18 else MEW_NIGHT_STATUSES
+    return random.choice(pool)
+
+
 # ❀───────────────────────────────❀
 #      💖  Refresh All Caches 💖
 # ❀───────────────────────────────❀
@@ -75,18 +117,47 @@ async def refresh_all_caches():
 
 
 # ❀───────────────────────────────❀
+#      💖  Status Rotator 💖
+# ❀───────────────────────────────❀
+@tasks.loop(minutes=5)
+async def status_rotator():
+    activity_type, message = pick_status_tuple()
+    pretty_log(
+        "", "👒  STATUS ROTATOR", f"Switching status → {activity_type.name}: {message}"
+    )
+    await bot.change_presence(
+        activity=discord.Activity(type=activity_type, name=message)
+    )
+
+
+# ❀───────────────────────────────❀
 #      💖  Startup Tasks 💖
 # ❀───────────────────────────────❀
 @tasks.loop(count=1)
 async def startup_tasks():
     await bot.wait_until_ready()
+
     # ❀ Load caches ❀
     await load_all_caches(bot)
+
     # ❀ Start cache refresher if not running ❀
     if not refresh_all_caches.is_running():
         refresh_all_caches.start()
 
+    # ❀ Start status rotator if not running ❀
+    if not status_rotator.is_running():
+        status_rotator.start()
+    activity_type, message = pick_status_tuple()
+    await bot.change_presence(
+        activity=discord.Activity(type=activity_type, name=message)
+    )
+    pretty_log(
+        tag="",
+        message=f"Initial presence set: {activity_type} {message}",
+        label="👒 Status Rotator",
+    )
     await startup_checklist(bot)
+
 
 # ❀───────────────────────────────❀
 #      💖  Startup Checklist 💖
@@ -98,6 +169,7 @@ async def startup_checklist(bot: commands.Bot):
     print("\n୨୧ ⏔⏔⏔⏔⏔⏔⏔⏔⏔⏔⏔⏔♡⏔⏔⏔⏔⏔⏔⏔⏔⏔⏔⏔⏔ ୨୧")
     print(f"✅ {len(bot.cogs)} 🌷 Cogs Loaded")
     print(f"✅ {len(market_alert_cache)} 🦄 Market Alerts")
+    print(f"✅ {status_rotator.is_running()} 👒 Status Rotator Running")
     print(f"✅ {startup_tasks.is_running()} 💄  Startup Tasks Running")
     pg_status = "Ready" if hasattr(bot, "pg_pool") else "Not Ready"
     print(f"✅ {pg_status} 🌺  PostgreSQL Pool")

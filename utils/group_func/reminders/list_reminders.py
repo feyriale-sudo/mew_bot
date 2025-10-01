@@ -117,6 +117,9 @@ async def reminders_list_func(bot, interaction: discord.Interaction):
         await loader.success(content="You have no reminders set.")
         return
 
+    # 🟣 Sort reminders by user_reminder_id (ascending)
+    reminders.sort(key=lambda r: r["user_reminder_id"])
+
     paginator = RemindersPaginator(bot, interaction.user, reminders)
     embed = await paginator.get_embed()
 
