@@ -84,16 +84,16 @@ MEW_NIGHT_STATUSES = [
     (discord.ActivityType.playing, "with starlit reminders for Skaia ⋆˙⟡♡"),
     (discord.ActivityType.playing, "with pink dreams in the market ｡˚୨୧˚｡"),
     (discord.ActivityType.playing, "with quiet timers as Skaia rests ₊˚✧ ﾟ."),
-    (discord.ActivityType.listening, "to Skaia’s sleepy reminders ₊˚.⋆𐙚₊˚⊹♡"),
+    (discord.ActivityType.listening, "Skaia’s sleepy reminders ₊˚.⋆𐙚₊˚⊹♡"),
     (discord.ActivityType.watching, "over Skaia’s night market alerts ｡ﾟ•┈୨♡୧┈•ﾟ｡"),
     (discord.ActivityType.playing, "with starry timers and pink wishes ⊹₊ ⊹⋆˚｡𖦹"),
 ]
 
 MEW_DEFAULT_STATUSES = [
     (discord.ActivityType.watching, "everyday alerts for Skaia ｡･:*:･ﾟ★,｡･:*:･ﾟ☆"),
-    (discord.ActivityType.listening, "to Skaia’s reminder bells ♡₊˚︶꒷🎀꒷︶˚₊♡"),
+    (discord.ActivityType.listening, "Skaia’s reminder bells ♡₊˚︶꒷🎀꒷︶˚₊♡"),
     (discord.ActivityType.watching, "Skaia shop for Mews at the market 𓆩♡𓆪"),
-    (discord.ActivityType.listening, "to whispers of the market ₊˚⊹♡₊˚⊹"),
+    (discord.ActivityType.listening, "whispers of the market ₊˚⊹♡₊˚⊹"),
 ]
 
 
