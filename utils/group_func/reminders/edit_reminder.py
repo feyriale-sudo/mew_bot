@@ -22,23 +22,24 @@ from utils.visuals.pretty_defer import pretty_defer, pretty_error
 async def edit_reminder_func(
     bot,
     interaction: discord.Interaction,
-    reminder_id: int,
-    message: str,
-    remind_on: str,
-    title: str,
-    ping_role_1: discord.Role = None,
-    ping_role_2: discord.Role = None,
-    repeat_interval: str = None,
-    color: str = None,
-    image_url: str = None,
-    thumbnail_url: str = None,
-    footer_text: str = None,
+    reminder_id: str,
+    new_message: str = None,
+    new_remind_on: str = None,
+    new_title: str = None,
+    new_ping_role_1: discord.Role = None,
+    new_ping_role_2: discord.Role = None,
+    new_repeat_interval: str = None,
+    new_color: str = None,
+    new_image_url: str = None,
+    new_thumbnail_url: str = None,
+    new_footer_text: str = None,
 ):
     """Edit a user's reminder with confirmation and bot log embed."""
 
     user = interaction.user
     user_id = user.id
     user_name = user.name
+    reminder_id = int(reminder_id)
 
     loader = await pretty_defer(
         interaction=interaction, content=f"Editing your reminder...", ephemeral=False
@@ -55,50 +56,62 @@ async def edit_reminder_func(
         await loader.error(content="Bot log channel not found.")
         return
 
-    ping_role_1_id = ping_role_1.id if ping_role_1 else None
-    ping_role_2_id = ping_role_2.id if ping_role_2 else None
+    new_ping_role_1_id = new_ping_role_1.id if new_ping_role_1 else None
+    new_ping_role_2_id = new_ping_role_2.id if new_ping_role_2 else None
+
+    # Initialize optional vars
+    new_dec_color = None
+    new_remind_on_ts = None
+    new_repeat_seconds = None
 
     # Parse color
-    dec_color = None
-    if color:
-        success, dec_color, error_msg = hex_to_dec(color)
+    new_dec_color = None
+    if new_color:
+        success, new_dec_color, error_msg = hex_to_dec(new_color)
         if not success:
             await loader.error(content=f"🎨 Invalid color: {error_msg}")
             return
 
     # Parse remind_on
-    success, remind_on_ts, error_msg = parse_remind_on(remind_on)
-    if not success:
-        await loader.error(content=f"❌ {error_msg}")
-        return
+    if new_remind_on:
+        success, new_remind_on_ts, error_msg = parse_remind_on(new_remind_on)
+        if not success:
+            await loader.error(content=f"{error_msg}")
+            return
 
     # Parse repeat interval
-    repeat_seconds = None
-    if repeat_interval:
-        success, repeat_seconds_or_error = parse_repeat_interval(repeat_interval)
+    new_repeat_seconds = None
+    if new_repeat_interval:
+        success, repeat_seconds_or_error = parse_repeat_interval(new_repeat_interval)
         if not success:
             await loader.error(
-                content=f"❌ Invalid repeat interval: {repeat_seconds_or_error}"
+                content=f"Invalid repeat interval: {repeat_seconds_or_error}"
             )
             return
-        repeat_seconds = repeat_seconds_or_error
+        new_repeat_seconds = repeat_seconds_or_error
 
     # Build dict of updated fields
     update_fields = {
-        "message": message,
-        "remind_on": remind_on_ts,
-        "title": title,
-        "ping_role_1": ping_role_1_id,
-        "ping_role_2": ping_role_2_id,
-        "repeat_interval": repeat_seconds,
-        "color": dec_color,
-        "image_url": image_url,
-        "thumbnail_url": thumbnail_url,
-        "footer_text": footer_text,
+        "message": new_message,
+        "remind_on": new_remind_on_ts,
+        "title": new_title,
+        "ping_role_1": new_ping_role_1_id,
+        "ping_role_2": new_ping_role_2_id,
+        "repeat_interval": new_repeat_seconds,
+        "color": new_dec_color,
+        "image_url": new_image_url,
+        "thumbnail_url": new_thumbnail_url,
+        "footer_text": new_footer_text,
     }
     # Remove fields that are None to avoid overwriting existing values
     update_fields = {k: v for k, v in update_fields.items() if v is not None}
 
+    # 🛑 Check if user actually updated something
+    if not update_fields:
+        await loader.error(
+            content="You must update at least one field besides the reminder ID."
+        )
+        return
     try:
         await update_user_reminder(bot, user_id, reminder_id, update_fields)
     except Exception as e:
@@ -111,39 +124,52 @@ async def edit_reminder_func(
         return
 
     # 🩷✅ Build confirmation embed
+    remind_on_value = new_remind_on_ts or reminder["remind_on"]
+    old_thumbnail_url = reminder["thumbnail_url"]
+    old_image_url = reminder["image_url"]
+    old_footer_text = reminder["footer_text"]
+
     embed = discord.Embed(
         title=f"Reminder Updated: ID {reminder_id}",
         description=(
-            f"**Title:** {title or reminder['title']}\n"
-            f"**Message:** {message or reminder['message']}\n"
-            f"**Remind On:** <t:{int(remind_on_ts)}:F>"
+            f"**Title:** {new_title or reminder['title']}\n"
+            f"**Message:** {new_message or reminder['message']}\n"
+            f"**Remind On:** <t:{int(remind_on_value)}:F>"
         ),
-        color=dec_color or reminder.get("color") or 0xFF66A3,
+        color=new_dec_color or reminder.get("color") or 0xFF66A3,
         timestamp=datetime.now(),
     )
 
     # Add optional fields if present
-    if ping_role_1:
-        embed.add_field(name="🩷 Ping Role 1", value=ping_role_1.mention, inline=True)
-    if ping_role_2:
-        embed.add_field(name="🩷 Ping Role 2", value=ping_role_2.mention, inline=True)
-    if repeat_seconds:
+    if new_ping_role_1:
+        embed.add_field(
+            name="🩷 Ping Role 1", value=new_ping_role_1.mention, inline=True
+        )
+    if new_ping_role_2:
+        embed.add_field(
+            name="🩷 Ping Role 2", value=new_ping_role_2.mention, inline=True
+        )
+    if new_repeat_seconds:
         embed.add_field(
             name="🩷 Repeat Interval",
-            value=f"{repeat_interval} ({repeat_seconds} seconds)",
+            value=f"{new_repeat_interval} ({new_repeat_seconds} seconds)",
             inline=True,
         )
-    if image_url:
-        embed.set_image(url=image_url)
-    if thumbnail_url:
-        embed.set_thumbnail(url=thumbnail_url)
-    if footer_text:
-        embed.set_footer(text=footer_text)
 
-    embed = design_embed(user=user, embed=embed)
+    thumbnail_url = new_thumbnail_url or old_thumbnail_url
+    image_url = new_image_url or old_image_url
+    footer_text = new_footer_text or old_footer_text
+
+    embed = await design_embed(
+        user=user,
+        embed=embed,
+        thumbnail_url=thumbnail_url,
+        image_url=image_url,
+        footer_text=footer_text,
+    )
 
     # Send confirmation
-    await loader.success(embed=embed, content="✅ Reminder updated!")
+    await loader.success(embed=embed, content="Reminder updated!")
 
     pretty_log(
         tag="success",
@@ -157,18 +183,24 @@ async def edit_reminder_func(
                 title=f"🩷 Reminder Updated (ID {reminder_id})",
                 description=(
                     f"- **Member:** {user.mention}\n"
-                    f"- **Title:** {title or reminder['title']}\n"
-                    f"- **Message:** {message or reminder['message']}\n"
-                    f"- **Remind On:** <t:{int(remind_on_ts)}:F>\n"
-                    f"{f'- **Repeat Interval:** {repeat_interval} ({repeat_seconds} seconds)\n' if repeat_seconds else ''}"
-                    f"{f'- **Ping Role 1:** <@&{ping_role_1_id}>\n' if ping_role_1_id else ''}"
-                    f"{f'- **Ping Role 2:** <@&{ping_role_2_id}>\n' if ping_role_2_id else ''}"
-                    f"{f'- **Color:** {color}\n' if color else ''}"
+                    f"- **Title:** {new_title or reminder['title']}\n"
+                    f"- **Message:** {new_message or reminder['message']}\n"
+                    f"- **Remind On:** <t:{int(remind_on_value)}:F>\n"
+                    f"{f'- **Repeat Interval:** {new_repeat_interval} ({new_repeat_seconds} seconds)\n' if new_repeat_seconds else ''}"
+                    f"{f'- **Ping Role 1:** <@&{new_ping_role_1_id}>\n' if new_ping_role_1_id else ''}"
+                    f"{f'- **Ping Role 2:** <@&{new_ping_role_2_id}>\n' if new_ping_role_2_id else ''}"
+                    f"{f'- **Color:** {new_color}\n' if new_color else ''}"
                 ),
-                color=dec_color or reminder.get("color") or 0xFF66A3,
+                color=new_dec_color or reminder.get("color") or 0xFF66A3,
                 timestamp=datetime.now(),
             )
-            log_embed = design_embed(user=user, embed=log_embed)
+            log_embed = await design_embed(
+                user=user,
+                embed=embed,
+                thumbnail_url=thumbnail_url,
+                image_url=image_url,
+                footer_text=footer_text,
+            )
             await log_channel.send(embed=log_embed)
         except Exception as e:
             pretty_log(

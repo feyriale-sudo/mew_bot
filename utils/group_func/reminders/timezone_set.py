@@ -46,7 +46,7 @@ async def reminder_set_timezone_func(
     user_embed = discord.Embed(
         title="Timezone set successfully", description=f"Timezone: {timezone}"
     )
-    user_embed = design_embed(
+    user_embed = await design_embed(
         user=user,
         embed=user_embed,
     )
@@ -56,7 +56,7 @@ async def reminder_set_timezone_func(
         title="Timezone updated",
         description=f"- Member: {user.mention}\n- Timezone: {timezone}",
     )
-    server_embed = design_embed(
+    server_embed = await design_embed(
         user=user,
         embed=server_embed,
     )

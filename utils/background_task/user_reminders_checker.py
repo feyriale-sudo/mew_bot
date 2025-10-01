@@ -38,6 +38,13 @@ async def process_due_reminders(bot):
 
     for r in reminders:
         try:
+            # 📝 Make sure remind_on is a datetime (convert if stored as Unix int)
+            remind_on = (
+                datetime.fromtimestamp(r["remind_on"])
+                if isinstance(r["remind_on"], (int, float))
+                else r["remind_on"]
+            )
+
             # Build the embed for the reminder
             embed = discord.Embed(
                 title=r["title"] or "Reminder",
@@ -50,7 +57,11 @@ async def process_due_reminders(bot):
             if r.get("thumbnail_url"):
                 embed.set_thumbnail(url=r["thumbnail_url"])
             if r.get("footer_text"):
-                embed.set_footer(text=r["footer_text"])
+                guild_icon_url = (
+                    reminder_channel.guild.icon.url if reminder_channel.guild.icon else None
+                )
+                embed.set_footer(text=r["footer_text"], icon_url=guild_icon_url)
+
 
             # Prepare ping roles if any
             ping_text = ""
@@ -59,32 +70,49 @@ async def process_due_reminders(bot):
             if r.get("ping_role_2"):
                 ping_text += f"<@&{r['ping_role_2']}> "
 
-            # Send the reminder
+            # 📤 Send the reminder
             await reminder_channel.send(content=ping_text or None, embed=embed)
 
-            # Handle repeat vs one-off
+            # 🔁 Handle repeat vs one-off
             if r.get("repeat_interval"):
-                new_remind_on = r["remind_on"] + timedelta(seconds=r["repeat_interval"])
+                # If remind_on is datetime → convert to unix int before adding
+                if isinstance(remind_on, datetime):
+                    new_remind_on = int(remind_on.timestamp()) + int(
+                        r["repeat_interval"]
+                    )
+                else:
+                    # Already unix int
+                    new_remind_on = int(remind_on) + int(r["repeat_interval"])
+
                 await update_user_reminder(
                     bot,
                     r["user_id"],
                     r["user_reminder_id"],
-                    {"remind_on": new_remind_on},
+                    {"remind_on": new_remind_on},  # always int
                 )
                 pretty_log(
                     tag="success",
-                    message=f"🔁 Repeated reminder {r['user_reminder_id']} for user {r['user_id']}, next at {new_remind_on}",
+                    message=(
+                        f"🔁 Repeated reminder {r['user_reminder_id']} for user {r['user_id']}, "
+                        f"next at <t:{new_remind_on}:F>"
+                    ),
                 )
             else:
                 await remove_user_reminder(bot, r["user_id"], r["user_reminder_id"])
                 pretty_log(
                     tag="success",
-                    message=f"🗑️ One-off reminder {r['user_reminder_id']} sent and deleted for user {r['user_id']}",
+                    message=(
+                        f"🗑️ One-off reminder {r['user_reminder_id']} sent and deleted "
+                        f"for user {r['user_id']}"
+                    ),
                 )
 
         except Exception as e:
             pretty_log(
                 tag="error",
-                message=f"Failed to send/process reminder {r['user_reminder_id']} for user {r['user_id']}: {e}",
+                message=(
+                    f"Failed to send/process reminder {r['user_reminder_id']} "
+                    f"for user {r['user_id']}: {e}"
+                ),
                 include_trace=True,
             )

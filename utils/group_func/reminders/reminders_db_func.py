@@ -1,39 +1,53 @@
 # utils/database/user_reminders_db_functions.py
-
 import asyncpg
+import discord
+# 🟣 Reminder ID Autocomplete
+from discord import app_commands
+
+from utils.logs.pretty_log import pretty_log
 
 # 🔮────────────────────────────────────────────
 #           ✨ Reminder DB Functions
 # 🔮────────────────────────────────────────────
 
-# 🟣 Reminder ID Autocomplete
-from discord import app_commands
-import discord
 
 
 # 🟣 Reminder ID Autocomplete (User-specific)
 async def reminder_id_autocomplete(interaction: discord.Interaction, current: str):
     """
-    Autocomplete function for reminder options.
-    Shows user_reminder_id with title only: "1: Reminder title"
-    Filters by what user types in 'current'.
-    Only shows reminders belonging to the user.
+    Autocomplete showing the global reminder_id:
+      "Reminder ID 4: My reminder title"
+    Filters by 'current' and returns up to 25 choices.
     """
-    # Fetch reminders for this user
     reminders = await fetch_all_user_reminders(interaction.client, interaction.user.id)
 
-    # Only include reminders with a title
-    choices = [
-        app_commands.Choice(
-            name=f"{r['user_reminder_id']}: {r['title']}",
-            value=r["user_reminder_id"],  # the per-user incremental ID
-        )
-        for r in reminders
-        if r["title"] and current.lower() in r["title"].lower()
-    ]
+    choices = []
+    q = (current or "").lower().strip()
 
-    # Return only up to 25 choices (Discord limit)
-    return choices[:25]
+    for r in reminders:
+        # prefer title, fall back to message
+        title = r.get("title") or r.get("message") or ""
+        if not title:
+            continue
+
+        # filter by the user's typed text (if any)
+        if q and q not in title.lower():
+            continue
+
+        # Use the global reminder_id in display and as the returned value
+        display = f"Reminder ID {r['user_reminder_id']}: {title}"
+        choices.append(
+            app_commands.Choice(
+                name=display[:100],
+                value=str(r["user_reminder_id"])  # 🔑 convert to string
+            )
+        )
+
+
+        if len(choices) >= 25:
+            break
+
+    return choices
 
 
 async def upsert_user_reminder(
@@ -82,6 +96,7 @@ async def upsert_user_reminder(
             thumbnail_url,
             footer_text,
         )
+
 # 🟣 Update Reminder by User Reminder ID
 async def update_user_reminder(
     bot,
@@ -100,27 +115,56 @@ async def update_user_reminder(
         })
     """
     if not fields:
+        pretty_log(
+            tag="warn",
+            message=f"[Reminder Update] Skipped update: No fields provided for user_id={user_id}, reminder_id={user_reminder_id}",
+        )
         return  # Nothing to update
 
     async with bot.pg_pool.acquire() as conn:
-        # Dynamically build the SET clause with numbered placeholders
-        set_clauses = []
-        values = []
-        for i, (key, value) in enumerate(fields.items(), start=1):
-            set_clauses.append(f"{key} = ${i}")
-            values.append(value)
+        try:
+            # Dynamically build the SET clause with numbered placeholders
+            set_clauses = []
+            values = []
+            for i, (key, value) in enumerate(fields.items(), start=1):
+                set_clauses.append(f"{key} = ${i}")
+                values.append(value)
 
-        # Append the identifying fields as the last parameters
-        values.append(user_id)
-        values.append(user_reminder_id)
+            # Append the identifying fields as the last parameters
+            values.append(user_id)
+            values.append(user_reminder_id)
 
-        query = f"""
-        UPDATE user_reminders
-        SET {', '.join(set_clauses)}
-        WHERE user_id = ${len(values)-1} AND user_reminder_id = ${len(values)};
-        """
+            query = f"""
+            UPDATE user_reminders
+            SET {', '.join(set_clauses)}
+            WHERE user_id = ${len(values)-1} AND user_reminder_id = ${len(values)};
+            """
 
-        await conn.execute(query, *values)
+            pretty_log(
+                tag="db",
+                message=f"[Reminder Update] Attempting update for user_id={user_id}, reminder_id={user_reminder_id}, fields={fields}",
+            )
+
+            result = await conn.execute(query, *values)
+
+            if result == "UPDATE 0":
+                pretty_log(
+                    tag="warn",
+                    message=f"[Reminder Update] No rows matched for user_id={user_id}, reminder_id={user_reminder_id}",
+                )
+            else:
+                pretty_log(
+                    tag="success",
+                    message=f"[Reminder Update] Success: {result} for user_id={user_id}, reminder_id={user_reminder_id}",
+                )
+
+        except Exception as e:
+            pretty_log(
+                tag="error",
+                message=f"[Reminder Update] Failed for user_id={user_id}, reminder_id={user_reminder_id}, fields={fields}: {e}",
+                include_trace=True,
+            )
+            raise
 
 
 # 🟣 Update by Field
@@ -190,7 +234,7 @@ async def fetch_user_reminder(bot, user_id: int, reminder_id: int):
             """
             SELECT *
             FROM user_reminders
-            WHERE reminder_id = $1 AND user_id = $2;
+            WHERE user_reminder_id = $1 AND user_id = $2;
             """,
             reminder_id,
             user_id,
@@ -242,12 +286,12 @@ async def fetch_all_user_reminders(bot, user_id: int):
 
 # 🟣 Fetch Due
 async def fetch_due_reminders(bot):
-    """Fetch reminders that are due now or earlier."""
+    """Fetch reminders that are due now or earlier (using UNIX seconds)."""
     async with bot.pg_pool.acquire() as conn:
         return await conn.fetch(
             """
             SELECT * FROM user_reminders
-            WHERE remind_on <= NOW()
+            WHERE remind_on <= EXTRACT(EPOCH FROM NOW())::BIGINT
             ORDER BY remind_on ASC;
             """
         )

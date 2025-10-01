@@ -37,8 +37,8 @@ async def remove_reminder_func(bot, interaction: discord.Interaction, reminder_i
         all_reminders = True
 
     loader = await pretty_defer(
-        interaction,
-        f"Removing {display_reminder_id}...",
+        interaction=interaction,
+        content=f"Removing {display_reminder_id}...",
         ephemeral=True,
     )
 
@@ -61,7 +61,7 @@ async def remove_reminder_func(bot, interaction: discord.Interaction, reminder_i
             description=(
                 f"**Title:** {reminder['title'] or 'N/A'}\n"
                 f"**Message:** {reminder['message']}\n"
-                f"**Remind on:** <t:{int(reminder['remind_on'].timestamp())}:F>\n"
+                f"**Remind on:** <t:{int(reminder['remind_on'])}:F>\n"
                 f"{f'**Repeat Interval:** {reminder['repeat_interval']}s\n' if reminder['repeat_interval'] else ''}"
                 f"{f'**Ping Role 1:** <@&{reminder['ping_role_1']}>\n' if reminder['ping_role_1'] else ''}"
                 f"{f'**Ping Role 2:** <@&{reminder['ping_role_2']}>\n' if reminder['ping_role_2'] else ''}"
@@ -69,13 +69,19 @@ async def remove_reminder_func(bot, interaction: discord.Interaction, reminder_i
             color=reminder["color"] or 0xFF5555,
             timestamp=datetime.now(),
         )
-        if reminder.get("image_url"):
-            embed.set_image(url=reminder["image_url"])
-        if reminder.get("thumbnail_url"):
-            embed.set_thumbnail(url=reminder["thumbnail_url"])
-        embed = design_embed(user=user, embed=embed)
+        image_url = reminder.get("image_url")
+        thumbnail_url = reminder.get("thumbnail_url")
+        footer_text = reminder.get("footer_text")
 
-        await loader.success(embed=embed)
+        embed = await design_embed(
+            user=user,
+            embed=embed,
+            thumbnail_url=thumbnail_url,
+            image_url=image_url,
+            footer_text=footer_text,
+        )
+
+        await loader.success(embed=embed, content="")
 
         pretty_log(
             tag="success",
@@ -99,7 +105,7 @@ async def remove_reminder_func(bot, interaction: discord.Interaction, reminder_i
         # Build embed summarizing deleted reminders
         desc = ""
         for r in reminders[:10]:  # limit to 10 for embed size
-            desc += f"**{r['reminder_id']}: {r['title'] or r['message'][:20]}** — <t:{int(r['remind_on'].timestamp())}:F>\n"
+            desc += f"**{r['user_reminder_id']}: {r['title'] or r['message'][:20]}** — <t:{int(r['remind_on'])}:F>\n"
         if len(reminders) > 10:
             desc += f"...and {len(reminders)-10} more reminders.\n"
 
@@ -109,8 +115,8 @@ async def remove_reminder_func(bot, interaction: discord.Interaction, reminder_i
             color=0xFF5555,
             timestamp=datetime.now(),
         )
-        embed = design_embed(user=user, embed=embed)
-        await loader.success(embed=embed)
+        embed = await design_embed(user=user, embed=embed)
+        await loader.success(embed=embed, content="")
 
         pretty_log(
             tag="success",

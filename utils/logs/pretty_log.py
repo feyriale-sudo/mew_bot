@@ -20,6 +20,7 @@ MEW_TAGS = {
     "db": "🍡 DB",
     "cmd": "💖 Cmd",
     "ready": "🌷 Ready",
+    "success": "🧁 Success",
     "error": "❌ Error",  # red for clarity
     "warn": "⚠️ Warn",  # yellow for clarity
     "critical": "🚨 Critical",  # red for clarity

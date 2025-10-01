@@ -23,9 +23,11 @@ class RemindersPaginator(View):
         self.per_page = per_page
         self.page = 0
         self.max_page = (len(reminders) - 1) // per_page
+        self.message: discord.Message | None = None  # store the sent message
 
-        # Disable buttons if only 1 page
-        self.prev_button.disabled = self.next_button.disabled = self.max_page == 0
+        # 🟣 If there's only one page, remove buttons entirely
+        if self.max_page == 0:
+            self.clear_items()  # <-- removes all buttons
 
     @discord.ui.button(label="Previous", style=discord.ButtonStyle.primary)
     async def prev_button(self, interaction: discord.Interaction, button: Button):
@@ -37,7 +39,7 @@ class RemindersPaginator(View):
         self.page -= 1
         if self.page < 0:
             self.page = self.max_page
-        await interaction.response.edit_message(embed=self.get_embed())
+        await interaction.response.edit_message(embed=(await self.get_embed()))
 
     @discord.ui.button(label="Next", style=discord.ButtonStyle.primary)
     async def next_button(self, interaction: discord.Interaction, button: Button):
@@ -49,9 +51,9 @@ class RemindersPaginator(View):
         self.page += 1
         if self.page > self.max_page:
             self.page = 0
-        await interaction.response.edit_message(embed=self.get_embed())
+        await interaction.response.edit_message(embed=(await self.get_embed()))
 
-    def get_embed(self):
+    async def get_embed(self):
         start = self.page * self.per_page
         end = start + self.per_page
         page_reminders = self.reminders[start:end]
@@ -63,22 +65,22 @@ class RemindersPaginator(View):
                 (r["message"][:50] + "...") if len(r["message"]) > 50 else r["message"]
             )
             remind_on_str = (
-                f"<t:{int(r['remind_on'].timestamp())}:F>"
+                f"- **Remind on:** <t:{int(r['remind_on'])}:F>"
                 if r.get("remind_on")
                 else "N/A"
             )
             repeat_str = (
-                f" | Repeat: {r['repeat_interval']}s"
+                f"- **Repeat every:** {r['repeat_interval']}s"
                 if r.get("repeat_interval")
                 else ""
             )
             ping_roles = ""
             if r.get("ping_role_1"):
-                ping_roles += f" | <@&{r['ping_role_1']}>"
+                ping_roles += f"- **Ping Role 1:** <@&{r['ping_role_1']}>"
             if r.get("ping_role_2"):
-                ping_roles += f" | <@&{r['ping_role_2']}>"
+                ping_roles += f"\n - **Ping Role 2:** <@&{r['ping_role_2']}>"
 
-            desc += f"**{r['reminder_id']}: {title}** — {message_snippet} — {remind_on_str}{repeat_str}{ping_roles}\n"
+            desc += f"**Reminder ID: {r['user_reminder_id']}**\n - **Title:** {title}\n - **Message:** {message_snippet}\n{remind_on_str}\n{repeat_str}\n{ping_roles}\n"
 
         embed = discord.Embed(
             title=f"⏰ {self.user.name}'s Reminders ({len(self.reminders)})",
@@ -86,7 +88,18 @@ class RemindersPaginator(View):
             color=0x55AAFF,
             timestamp=datetime.now(),
         )
-        return design_embed(user=self.user, embed=embed)
+        return await design_embed(user=self.user, embed=embed)
+
+    async def on_timeout(self):
+        """Disable all buttons when paginator times out."""
+        for child in self.children:
+            if isinstance(child, Button):
+                child.disabled = True
+        if self.message:
+            try:
+                await self.message.edit(view=self)
+            except Exception as e:
+                pretty_log("error", f"Failed to disable paginator buttons: {e}")
 
 
 # 🌸───────────────────────────────────────────────🌸
@@ -96,13 +109,16 @@ async def reminders_list_func(bot, interaction: discord.Interaction):
     """Display all reminders for the user in a paginated embed."""
 
     loader = await pretty_defer(
-        interaction, "Fetching your reminders...", ephemeral=False
+        interaction=interaction, content="Fetching your reminders...", ephemeral=False
     )
     reminders = await fetch_all_user_reminders(bot, interaction.user.id)
 
     if not reminders:
-        await loader.error(content="You have no reminders set.")
+        await loader.success(content="You have no reminders set.")
         return
 
     paginator = RemindersPaginator(bot, interaction.user, reminders)
-    await loader.success(embed=paginator.get_embed(), view=paginator)
+    embed = await paginator.get_embed()
+
+    sent = await loader.success(embed=embed, view=paginator, content="")
+    paginator.message = sent  # keep reference so on_timeout can edit

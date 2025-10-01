@@ -94,7 +94,7 @@ async def add_reminder_func(
             footer_text=footer_text,
         )
     except Exception as e:
-        await loader.error(content="❌ Failed to set reminder.")
+        await loader.error(content="Failed to set reminder.")
         pretty_log(
             tag="error",
             message=f"Failed to set reminder for {user_name} ({user_id}): {e}",
@@ -123,17 +123,17 @@ async def add_reminder_func(
             value=f"{repeat_interval} ({repeat_seconds} seconds)",
             inline=True,
         )
-    if image_url:
-        embed.set_image(url=image_url)
-    if thumbnail_url:
-        embed.set_thumbnail(url=thumbnail_url)
-    if footer_text:
-        embed.set_footer(text=footer_text)
 
-    embed = design_embed(user=user, embed=embed)
+    embed = await design_embed(
+        user=user,
+        embed=embed,
+        thumbnail_url=thumbnail_url,
+        image_url=image_url,
+        footer_text=footer_text,
+    )
 
     # 🩷🎉 Send confirmation and log success
-    await loader.success(embed=embed, content="✅ Reminder set!")
+    await loader.success(embed=embed, content="Reminder set!")
     pretty_log(
         tag="success",
         message=f"Reminder set for {user_name} ({user_id}): '{message}' "
@@ -158,7 +158,7 @@ async def add_reminder_func(
             color=dec_color or 0xFF66A3,
             timestamp=datetime.now(),
         )
-        log_embed = design_embed(user=user, embed=log_embed)
+        log_embed = await design_embed(user=user, embed=log_embed)
         await log_channel.send(embed=log_embed)
     except Exception as e:
         pretty_log(
