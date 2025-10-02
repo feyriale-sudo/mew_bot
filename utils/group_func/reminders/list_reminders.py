@@ -53,41 +53,57 @@ class RemindersPaginator(View):
             self.page = 0
         await interaction.response.edit_message(embed=(await self.get_embed()))
 
+    #
     async def get_embed(self):
         start = self.page * self.per_page
         end = start + self.per_page
         page_reminders = self.reminders[start:end]
 
-        desc = ""
+        embed = discord.Embed(
+            title=f"⏰ {self.user.name}'s Reminders ({len(self.reminders)})",
+            color=0x55AAFF,
+            timestamp=datetime.now(),
+        )
+
         for r in page_reminders:
             title = r["title"] or "No Title"
             message_snippet = (
                 (r["message"][:50] + "...") if len(r["message"]) > 50 else r["message"]
             )
             remind_on_str = (
-                f"- **Remind on:** <t:{int(r['remind_on'])}:F>"
+                f"- **Remind On:** <t:{int(r['remind_on'])}:F>"
                 if r.get("remind_on")
-                else "N/A"
+                else "- **Remind On:** N/A"
             )
             repeat_str = (
-                f"- **Repeat every:** {r['repeat_interval']}s"
+                f"- **Repeat Every:** {r['repeat_interval']}s"
                 if r.get("repeat_interval")
                 else ""
             )
-            ping_roles = ""
+
+            # Compose field value with blockquote style
+            field_value_lines = [
+                f"> - **Message:** {message_snippet}",
+                f"> {remind_on_str}",
+            ]
+            if repeat_str:
+                field_value_lines.append(f"> {repeat_str}")
+
+            # You had ping roles in old code, keep if exists
             if r.get("ping_role_1"):
-                ping_roles += f"- **Ping Role 1:** <@&{r['ping_role_1']}>"
+                field_value_lines.append(f"> - **Ping Role 1:** <@&{r['ping_role_1']}>")
             if r.get("ping_role_2"):
-                ping_roles += f"\n - **Ping Role 2:** <@&{r['ping_role_2']}>"
+                field_value_lines.append(f"> - **Ping Role 2:** <@&{r['ping_role_2']}>")
 
-            desc += f"**Reminder ID: {r['user_reminder_id']}**\n - **Title:** {title}\n - **Message:** {message_snippet}\n{remind_on_str}\n{repeat_str}\n{ping_roles}\n"
+            field_value = "\n".join(field_value_lines)
 
-        embed = discord.Embed(
-            title=f"⏰ {self.user.name}'s Reminders ({len(self.reminders)})",
-            description=desc,
-            color=0x55AAFF,
-            timestamp=datetime.now(),
-        )
+            # Add a field per reminder
+            embed.add_field(
+                name=f"**Reminder ID: {r['user_reminder_id']} — {title}**",
+                value=field_value,
+                inline=False,
+            )
+
         return await design_embed(user=self.user, embed=embed)
 
     async def on_timeout(self):
