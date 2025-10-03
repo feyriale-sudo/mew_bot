@@ -9,7 +9,7 @@ from utils.group_func.reminders.reminders_db_func import fetch_all_user_reminder
 from utils.logs.pretty_log import pretty_log
 from utils.visuals.design_embed import design_embed
 from utils.visuals.pretty_defer import pretty_defer, pretty_error
-
+from utils.parsers.reminder_parser import format_repeats_on
 
 # 🌸───────────────────────────────────────────────🌸
 # 🩷 ⏰ PAGINATED REMINDERS LIST FUNCTION          🩷
@@ -75,11 +75,11 @@ class RemindersPaginator(View):
                 if r.get("remind_on")
                 else "- **Remind On:** N/A"
             )
-            repeat_str = (
-                f"- **Repeat Every:** {r['repeat_interval']}s"
-                if r.get("repeat_interval")
-                else ""
-            )
+            repeat_str = ""
+            if r.get("repeat_interval"):
+                # Always use compact format for embeds
+                repeat_str = f"- **Repeat Every:** {format_repeats_on(r['repeat_interval'], compact=True)}"
+
 
             # Compose field value with blockquote style
             field_value_lines = [

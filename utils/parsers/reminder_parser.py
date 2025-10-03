@@ -124,3 +124,45 @@ def parse_repeat_interval(value: str) -> tuple[bool, int | str]:
         return False, "Repeat interval must be at least 5 minutes"
 
     return True, total_seconds
+
+
+# 🌸───────────────────────────────────────────────🌸
+#       ⏰ Seconds → Human-readable time helper
+# 🌸───────────────────────────────────────────────🌸
+def format_repeats_on(seconds: int, compact: bool = False) -> str:
+    """
+    Convert seconds into human-readable duration.
+
+    Parameters:
+    - seconds: total seconds
+    - compact: if True, returns short form like '1d30m', else '1 day 30 minutes'
+
+    Returns:
+    - str
+    """
+    intervals = (
+        ("month", 30 * 24 * 60 * 60),
+        ("week", 7 * 24 * 60 * 60),
+        ("day", 24 * 60 * 60),
+        ("hour", 60 * 60),
+        ("minute", 60),
+    )
+
+    result = []
+
+    for name, count in intervals:
+        value = seconds // count
+        if value:
+            if compact:
+                # short form like 1d, 2h, 30m
+                result.append(f"{value}{name[0]}")
+            else:
+                # long form
+                unit = name if value == 1 else f"{name}s"
+                result.append(f"{value} {unit}")
+            seconds -= value * count
+
+    if not result:
+        return "0 minutes" if not compact else "0m"
+
+    return " ".join(result)

@@ -1,8 +1,9 @@
 import discord
-from utils.logs.pretty_log import pretty_log
-from config.aesthetic import *
 
-LOADING_EMOJI = Emojis.Flower_Loading
+from config.aesthetic import *
+from utils.logs.pretty_log import pretty_log
+
+LOADING_EMOJI = Emojis.Pink_Loading
 CHECK_EMOJI = Emojis.Pink_Check
 ERROR_EMOJI = Emojis.Pink_Error
 

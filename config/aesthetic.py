@@ -1,6 +1,6 @@
 class Emojis:
-    Flower_Loading = "<a:flower_loading:1422388770543501322>"
-    Pink_Check = "<a:pink_check:1422389779168755764>"
-    Pink_Error = "<a:pink_error:1422389797997252688>"
+    Pink_Loading = "<a:loading:1423481968057647304>"
+    Pink_Check = "<a:checkmark:1423481884570030180>"
+    Pink_Error = "<:exclamation:1423482001482317864>"
     PokeCoin = "<:pokecoin:1422413126174769175>"
-    Pink_Sparkles = "<a:pink_sparkles_2:1422914147875688541>"
+    Pink_Sparkles = "<a:sparkles:1423482028304765029>"
