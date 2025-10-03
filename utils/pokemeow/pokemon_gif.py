@@ -2,7 +2,6 @@
 from typing import Literal
 from config.pokemon_gifs import *
 
-
 async def get_pokemon_gif(input_name: str):
     """
     Returns the pokemon gif
@@ -52,8 +51,8 @@ async def get_pokemon_gif(input_name: str):
     attr_name = remaining_name.replace("-", "_")
 
     gif_url = None
-    gif_name = None
 
+    # 🔹 Golden check (priority)
     if golden:
         if form == "mega":
             golden_attr_name = f"mega_{attr_name}"
@@ -63,6 +62,17 @@ async def get_pokemon_gif(input_name: str):
         else:
             gif_url = getattr(GOLDEN_POKEMON_URL, attr_name, None)
 
+    # 🔹 Shiny check (priority, same idea as golden)
+    if shiny and not gif_url:
+        if form == "mega":
+            shiny_attr_name = f"mega_{attr_name}"
+            gif_url = getattr(SHINY_POKEMON_URL, shiny_attr_name, None)
+        elif form == "gmax":
+            gif_url = getattr(SHINY_POKEMON_URL, f"gmax_{attr_name}", None)
+        else:
+            gif_url = getattr(SHINY_POKEMON_URL, attr_name, None)
+
+    # 🔹 Fallbacks
     if not gif_url:
         if form == "gmax":
             gif_url = getattr(
@@ -71,6 +81,7 @@ async def get_pokemon_gif(input_name: str):
         else:
             gif_url = getattr(REGULAR_POKEMON_URL, attr_name, None)
 
+    # 🔹 Last resort → showdown sprite
     if not gif_url:
         shiny_prefix = "ani-shiny" if shiny else "xyani"
         suffix = "" if form == "regular" else f"-{form}"

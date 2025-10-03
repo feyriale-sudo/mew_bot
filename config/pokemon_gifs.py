@@ -24,6 +24,9 @@ class REGULAR_POKEMON_URL:
     iron_jugulis = "https://media.discordapp.net/attachments/703428324822745172/1377710115570061393/993.gif?ex=68c50a48&is=68c3b8c8&hm=c896e367fcdf6ff17b57415a9e7cf2a8d29eda8b41c0e0e667a4b39a706694c8&=&width=140&height=124"
     iron_moth = "https://media.discordapp.net/attachments/1323758555605631001/1385351651115929662/994.gif?ex=68c52784&is=68c3d604&hm=04fefd317ede2991fe47319fec496a33b0c5e72d8357bc6b4e6182670fb5b2a9&=&width=132&height=98"
     iron_thorns = "https://media.discordapp.net/attachments/1323758555605631001/1385351875657732186/995.gif?ex=68c527b9&is=68c3d639&hm=2704b36bfc72b5056ace5c9b62a76574f94d026e7308f3a79e19dabb02635b47&=&width=89&height=119"
+    iron_valiant = "https://media.discordapp.net/attachments/886725599123636225/1423382289840341123/iron-variant.gif?ex=68e0c44f&is=68df72cf&hm=debf4933fb8ce5d2b83d35a569bf6343817cfe073c0393d8197c5460748ca97e&=&width=61&height=107"
+    enamorous_therian = "https://images-ext-1.discordapp.net/external/W2twYEqZSNqd2VgdB8-h6BjWt9vNlJTcBGvIu-eWPx0/https/play.pokemonshowdown.com/sprites/ani/enamorus-therian.gif?width=83&height=80"
+    pikachu_partner = "https://images-ext-1.discordapp.net/external/PsEp46xUWCw_2pz_0h3ubj_1BX7_G_J6Bdt_BW322I0/https/play.pokemonshowdown.com/sprites/ani/pikachu-partner.gif?width=68&height=66"
 
 
 class GOLDEN_MEGA_POKEMON_URL:
@@ -64,6 +67,27 @@ class GOLDEN_MEGA_POKEMON_URL:
     mega_absol = "https://media.discordapp.net/attachments/677411940989009923/1392959189508165663/7129.gif?ex=68b0b5d6&is=68af6456&hm=de2b612d02cacb43aed2ad31c08475f2122c271a64c02ca6a96a1a9398464189&="
 
     mega_audino = "https://media.discordapp.net/attachments/1323758555605631001/1415848151725641798/mega-audino.gif?ex=68c55b98&is=68c40a18&hm=f33c7321654d8fa88852b96aa486a2dddc025e5fe1bfc1ecf148a5a41c19126f&=&width=73&height=108"
+
+    mega_slowbro = "https://media.discordapp.net/attachments/1323758555605631001/1423397032269316177/080-mega.gif?ex=68e0d209&is=68df8089&hm=8f97b0104bbe5967e3eda92b71ab7ee6447082a134d7ffe89c2e7c058f829356&=&width=84&height=98"
+
+
+class SHINY_POKEMON_URL:
+    # 🌌 Arceus Forms
+    arceus_normal = "https://images-ext-1.discordapp.net/external/5cORhDO0Vij4n3N6ILgkxkaQGpWIRsWHGsVOqPu0mtI/https/play.pokemonshowdown.com/sprites/ani-shiny/arceus.gif?width=92&height=128"
+    arceus_flying = "https://media.discordapp.net/attachments/797746750512693262/1423408415740395591/arceus-flying.gif?ex=68e0dca3&is=68df8b23&hm=a1ae90e7d4e768b94f7857177b4ad6039bb241c62b8c59ea79cc974630f213bd&=&width=97&height=131"
+    arceus_bug = "https://media.discordapp.net/attachments/1331944490935517184/1331996972588204094/7667.gif?ex=68e08919&is=68df3799&hm=a66e7ef12d543a7bcca8328a5cb32e3f5cab8935a4298b16f1b7fe16eab49cb0&=&width=97&height=131"
+    arceus_dark = "https://media.discordapp.net/attachments/1187344543750836256/1194256245926920203/arceus-dark.gif?ex=68e06a0d&is=68df188d&hm=e7b219afaac2ade669ff59b191aa9387e34790b20e8457a7c0aca429747a840b&=&width=97&height=129"
+    arceus_dragon = "https://media.discordapp.net/attachments/1202428993408868373/1212163973437460520/arceus-dragon.gif?ex=68e04dac&is=68defc2c&hm=73b991f61c67bab17b1dc2d7d8ca28c6bfeb9f9fd5d5781281d101059054befb&=&width=97&height=131"
+    arceus_electric = "https://media.discordapp.net/attachments/703428324822745172/1377686050515845351/7589.gif?ex=68e0a35e&is=68df51de&hm=3c8b4305d1f450ca084ee667517f0d437044fdd4f8137b347941e458b7883702&=&width=97&height=133"
+    arceus_fairy = "https://media.discordapp.net/attachments/1278799530363719693/1293677344686346352/arceus-ghost.gif?ex=68e0e02a&is=68df8eaa&hm=dc67a20554230caada5b63269f46d422ff30bdf6630577761bc66c62dc85d6f2&=&width=97&height=129"
+    arceus_fighting = "https://media.discordapp.net/attachments/750121802394632236/1400619960606392470/arceus-fighting.gif?ex=68e05afc&is=68df097c&hm=1ec1fa10766942f9d2d1ac1f31f92cb9408245f6065ee0dc46dd69a15258c1b2&=&width=97&height=129"
+    arceus_fire = "https://media.discordapp.net/attachments/1202428993408868373/1230627113716027522/arceus-fire.gif?ex=68e0e50f&is=68df938f&hm=94ead7aa0dfa1d06d205a7959e4b324cd631409771015a6812dcc3203d2bff96&=&width=97&height=131"
+    arceus_ghost = "https://media.discordapp.net/attachments/1278799530363719693/1293677344686346352/arceus-ghost.gif?ex=68e0e02a&is=68df8eaa&hm=dc67a20554230caada5b63269f46d422ff30bdf6630577761bc66c62dc85d6f2&=&width=97&height=129"
+    arceus_grass = "https://media.discordapp.net/attachments/1249277613198016555/1253536076719591424/shiny_arceus-grass.gif?ex=68e08572&is=68df33f2&hm=9cd604967e2996e2adcc636c08dd534204962ba931c115a1a5c087b13efb5c1e&=&width=97&height=129"
+    arceus_ice = "https://media.discordapp.net/attachments/1154529612769009688/1183661873900552282/arceus-ice.gif?ex=68e0c386&is=68df7206&hm=0f9d90d7b75d81f6230d308c5e685e487b54af270b4787a16f5c36e5821a6391&=&width=100&height=131"
+    arceus_rock = "https://media.discordapp.net/attachments/722259513612435460/1392945634591637714/arceus-rock.gif?ex=68e0c7f6&is=68df7676&hm=babe818eacf0ba0e958da821db83db096e9123eb62dc7df9be1b0d7701f170e6&=&width=97&height=129"
+    arceus_steel = "https://media.discordapp.net/attachments/1302003337272627300/1302860332888231976/arceus-steel.gif?ex=68e0aa3d&is=68df58bd&hm=e4347071633670badb269929baaffed64511df23206f0e4c512f258bdfc40573&=&width=97&height=132"
+    arceus_water = "https://media.discordapp.net/attachments/1202428993408868373/1245838801457250397/arceus-water.gif?ex=68e0dd0c&is=68df8b8c&hm=149611e86766e56bf4f30479d87fb33ec31e181f354e127e2ed2e3fab05c535f&=&width=97&height=134"
 
 
 class GOLDEN_POKEMON_URL:
