@@ -94,7 +94,6 @@ async def toggle_market_alert_func(
         pretty_log(
             "error",
             f"Failed to toggle market alert for user {user_id}: {e}",
-            exc=e,
             include_trace=True,
         )
         await interaction.followup.send(

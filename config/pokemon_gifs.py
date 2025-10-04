@@ -91,6 +91,10 @@ class SHINY_POKEMON_URL:
 
 
 class GOLDEN_POKEMON_URL:
+    timburr = "https://images-ext-1.discordapp.net/external/30QDCSUhTwkrG1BUlJc4rX_iDbtUzfwXjfEEVD5J5TY/https/graphics.tppcrpg.net/xy/golden/532M.gif?width=71&height=69"
+    gurdurr = "https://images-ext-1.discordapp.net/external/agrg-13k0AmU53DtldLvmeY0DQ_r07pRkvPdrB4ozuI/https/graphics.tppcrpg.net/xy/golden/533M.gif?width=110&height=88"
+    conkeldurr = "https://images-ext-1.discordapp.net/external/RbkDkXO1xn6mghaHzYkhJ6ZfJy_uoIG-doeo179Tprk/https/graphics.tppcrpg.net/xy/golden/534M.gif?width=138&height=100"
+    
     kyurem_black = "https://cdn.discordapp.com/attachments/1154529612769009688/1184788670956445776/kyurem-black.gif?ex=67ce07af&is=67ccb62f&hm=6f810a5bc26dd833b9a591a8ab40844f87c0a6ca1c7457f5459c11fc78b5ddac&"
 
     kyurem_white = "https://cdn.discordapp.com/attachments/1154529612769009688/1184788892726087700/kyurem-white.gif?ex=67ce07e4&is=67ccb664&hm=67818816bcf7bc4a9f5241d421d18435e5b5a08d785b723d6d22ff9b4af4d9aa&"

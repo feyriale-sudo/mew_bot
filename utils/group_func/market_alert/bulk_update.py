@@ -74,7 +74,6 @@ async def update_market_alert_role_channel_func(
         pretty_log(
             "error",
             f"Failed bulk updating alerts for {user_id}: {e}",
-            exc=e,
             include_trace=True,
         )
         await loader.error(content=f"An unexpected error occurred: {e}")

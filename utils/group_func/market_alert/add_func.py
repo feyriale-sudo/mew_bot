@@ -15,13 +15,13 @@ from utils.logs.pretty_log import pretty_log
 from utils.pokemeow.parsers import parse_special_mega_input, resolve_pokemon_input
 from utils.visuals.design_embed import design_embed
 from utils.visuals.pretty_defer import pretty_defer, pretty_error
-
+from utils.parsers.number_parser import parse_compact_number
 
 async def add_market_alert_func(
     bot,
     interaction: discord.Interaction,
     pokemon: str,
-    max_price: int,
+    max_price: str,
     channel: discord.TextChannel,
     role: Optional[discord.Role] = None,
     mobile_role_input: Optional[str] = None,
@@ -71,6 +71,15 @@ async def add_market_alert_func(
         role_mention = f" <@&{role_id}>"
 
     pokemon_title = pokemon.title()
+
+    # 🌸 Validate max price
+    parse_price = parse_compact_number(max_price)
+    if not parse_price:
+        await loader.error(
+            content="Invalid max price. Use formats like '1000', '1k', '1.5m'. Max is 10 billion.",
+        )
+        return
+    max_price = int(parse_price)
 
     try:
         # 🔹 Step 1: Resolve Pokémon
@@ -122,7 +131,7 @@ async def add_market_alert_func(
         await loader.edit(content="Finalizing...")
 
     except Exception as e:
-        pretty_log("critical", f"Market alert failed: {e}", exc=e)
+        pretty_log("critical", f"Market alert failed: {e}", )
         await loader.error(
             content=f"Market alert Add failed: {e}",
         )
@@ -193,6 +202,6 @@ async def add_market_alert_func(
         pretty_log(
             "error",
             f"Failed to send final embed: {e}",
-            exc=e,
+
             include_trace=True,
         )

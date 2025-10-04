@@ -150,7 +150,6 @@ async def mine_market_alerts_func(bot, interaction: discord.Interaction):
         pretty_log(
             "error",
             f"Failed to fetch or send market alerts: {e}",
-            exc=e,
             include_trace=True,
         )
         await interaction.followup.send(
