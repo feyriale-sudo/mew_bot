@@ -93,7 +93,7 @@ MEW_DEFAULT_STATUSES = [
     (discord.ActivityType.watching, "everyday alerts for Skaia ｡･:*:･ﾟ★,｡･:*:･ﾟ☆"),
     (discord.ActivityType.listening, "Skaia’s reminder bells ♡₊˚︶꒷🎀꒷︶˚₊♡"),
     (discord.ActivityType.watching, "Skaia shop for Mews at the market 𓆩♡𓆪"),
-    (discord.ActivityType.listening, "whispers of the market ₊˚⊹♡₊˚⊹"),g
+    (discord.ActivityType.listening, "whispers of the market ₊˚⊹♡₊˚⊹"),
 ]
 
 
