@@ -1,9 +1,32 @@
 import discord
+import pytz
 from utils.logs.pretty_log import pretty_log
-
+from discord import app_commands
 # ==================================================
 # 💜 TIMEZONE DB FUNCTIONS
 # ==================================================
+
+
+# -------------------- [💙 AUTOCOMPLETE] --------------------
+async def tz_autocomplete(
+    interaction: discord.Interaction, current: str
+) -> list[app_commands.Choice[str]]:
+    matches = autocomplete_timezones(current)
+    return [app_commands.Choice(name=tz, value=tz) for tz in matches]
+
+
+# -------------------- [💙 VALIDATE] --------------------
+def is_valid_timezone(tz: str) -> bool:
+    """Check if a given string is a valid IANA timezone."""
+    return tz in pytz.all_timezones
+
+
+# -------------------- [💙 AUTOCOMPLETE LIST] --------------------
+def autocomplete_timezones(current: str) -> list[str]:
+    """Return a list of matching timezones for autocomplete."""
+    current_lower = current.lower()
+    matches = [tz for tz in pytz.all_timezones if current_lower in tz.lower()]
+    return matches[:25]  # Discord limits autocomplete to 25 suggestions
 
 
 # -------------------- [💙 SET/UPDATE] --------------------

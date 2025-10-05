@@ -9,8 +9,12 @@ from discord import Embed
 
 from config.aesthetic import Emojis
 from config.settings import *
-from utils.cache.cache_list import _market_alert_index, market_alert_cache
-from utils.logs.debug_logs import debug_log, enable_debug
+from utils.cache.cache_list import (
+    _market_alert_index,
+    _missing_pokemon_index,
+    market_alert_cache,
+    missing_pokemon_cache,
+)
 from utils.logs.pretty_log import pretty_log
 
 PokeCoin = Emojis.PokeCoin
@@ -22,104 +26,129 @@ ALLOWED_WEBHOOKS = {
     1422431171639378043,  # Golden
 }
 
-# 🔹 Global role cache (guild_id, role_id) -> discord.Role
+# 🔹 Cache for roles
 _role_cache: dict[tuple[int, int], discord.Role] = {}
 
 
-# enable_debug(f"{__name__}.process_market_alert_message")
-
-
+# 💜────────────────────────────────────────────
+#   Process Market + Missing Pokémon Alerts
+# 💜────────────────────────────────────────────
 async def process_market_alert_message(
     bot: discord.Client, message: discord.Message, market_category_id: int
 ):
-    debug_log("Entered process_market_alert_message()", highlight=True)
-
+    """Send alerts for Pokémon listed on market and/or missing Pokémon entries."""
     if message.channel.category_id != market_category_id:
-        debug_log(
-            f"Skipped: channel {message.channel.id} not in category {market_category_id}"
-        )
         return
     if message.webhook_id not in ALLOWED_WEBHOOKS:
-        debug_log(f"Skipped: webhook {message.webhook_id} not allowed")
+        pretty_log("debug", f"Message from unallowed webhook: {message.webhook_id}")
         return
     if not message.embeds:
-        debug_log("Skipped: no embeds in message")
+        pretty_log("debug", "Message has no embeds")
         return
 
     embed = message.embeds[0]
     embed_author_name = embed.author.name if embed.author else ""
-    debug_log(f"Embed author parsed: {embed_author_name!r}")
 
     match = re.match(r"(.+?)\s+#(\d+)", embed_author_name)
     if not match:
-        debug_log("Skipped: could not extract name + dex from author")
+        pretty_log("debug", f"Could not parse embed author name: {embed_author_name}")
         return
 
     poke_name = match.group(1)
     poke_dex = int(match.group(2))
-    debug_log(f"Extracted Pokémon: {poke_name} (Dex {poke_dex})")
-
     fields = {f.name: f.value for f in embed.fields}
-    debug_log(f"Embed fields extracted: {list(fields.keys())}")
 
     listed_price_str = re.sub(r"<a?:\w+:\d+>", "", fields.get("Listed Price", "0"))
     match_price = re.search(r"(\d[\d,]*)", listed_price_str)
     listed_price = int(match_price.group(1).replace(",", "")) if match_price else 0
-    debug_log(f"Parsed listed price: {listed_price}")
-
-    # Rebuild index if empty
-    if not _market_alert_index:
-        debug_log("Rebuilding market alert index...")
-        _market_alert_index.clear()
-        for alert in market_alert_cache:
-            key = alert["pokemon"].lower()
-            _market_alert_index.setdefault(key, []).append(alert)
-        debug_log(f"Market alert index rebuilt: {len(_market_alert_index)} entries")
-
     original_id = fields.get("ID", "0")
 
-    # ✅ O(1) lookup
-    alerts_to_check = _market_alert_index.get(poke_name.lower(), [])
-    debug_log(f"Found {len(alerts_to_check)} alerts for {poke_name}")
+    pretty_log(
+        "debug",
+        f"Processing market message: {poke_name} #{poke_dex} for {listed_price:,}",
+    )
 
-    if not alerts_to_check:
-        debug_log("Fallback: scanning full cache")
-        alerts_to_check = [
-            alert
-            for alert in market_alert_cache
-            if alert["pokemon"].lower() == poke_name.lower()
-        ]
-        debug_log(f"Fallback found {len(alerts_to_check)} alerts")
+    # 🧩 Build Market Index (if needed) - Fix the indexing structure
+    # The cache loader uses 3-tuples, but we need pokemon-name lookup
+    temp_index = {}
+    for alert in market_alert_cache:
+        key = alert["pokemon"].lower()
+        temp_index.setdefault(key, []).append(alert)
 
-    for alert in alerts_to_check:
-        debug_log(
-            f"Checking alert {alert['user_id']} for {alert['pokemon']}", highlight=True
+    # 💼 Lookup both Market + Missing
+    alerts_to_check = temp_index.get(poke_name.lower(), [])
+    missing_matches = [
+        m
+        for m in missing_pokemon_cache
+        if m.get("pokemon_name", "").lower() == poke_name.lower()
+    ]
+
+    # 🩵 Combine users from both caches
+    all_user_ids = {a["user_id"] for a in alerts_to_check} | {
+        m["user_id"] for m in missing_matches
+    }
+
+    # Debug logging to help troubleshoot
+    if poke_name.lower() == "weedle":
+        pretty_log("debug", f"Cache has {len(market_alert_cache)} total alerts")
+        pretty_log("debug", f"Found {len(alerts_to_check)} Weedle alerts")
+        for i, alert in enumerate(alerts_to_check):
+            pretty_log(
+                "debug",
+                f"  Alert {i+1}: max_price={alert.get('max_price')}, user_id={alert.get('user_id')}",
+            )
+        if not alerts_to_check:
+            pretty_log(
+                "debug",
+                f"Available pokemon in cache: {list(set(alert.get('pokemon', '') for alert in market_alert_cache[:10]))}",
+            )
+
+    for user_id in all_user_ids:
+        # Identify state
+        market_alert_entry = next(
+            (a for a in alerts_to_check if a["user_id"] == user_id), None
+        )
+        missing_entry = next(
+            (m for m in missing_matches if m["user_id"] == user_id), None
         )
 
-        if not alert.get("notify", True):
-            debug_log("Skipped alert: notify=False")
+        has_market = bool(market_alert_entry)
+        has_missing = bool(missing_entry)
+
+        # 🌷 Skip empty
+        if not (has_market or has_missing):
             continue
-        if int(alert["dex_number"]) != poke_dex:
-            debug_log(
-                f"Skipped alert: dex mismatch ({alert['dex_number']} vs {poke_dex})"
+
+        # 💸 Skip overpriced market alerts only if NOT also missing
+        if (
+            has_market
+            and not has_missing
+            and listed_price > market_alert_entry["max_price"]
+        ):
+            pretty_log(
+                "skip",
+                f"Skipped alert for {poke_name}: listed price {listed_price:,} > max {market_alert_entry['max_price']:,} (user {user_id}) [market only]",
             )
             continue
-        if listed_price > alert["max_price"]:
-            debug_log(f"Skipped alert: price {listed_price} > max {alert['max_price']}")
-            continue
+        elif (
+            has_market
+            and has_missing
+            and listed_price > market_alert_entry["max_price"]
+        ):
+            pretty_log(
+                "info",
+                f"Ignored price limit for {poke_name} (listed {listed_price:,}, max {market_alert_entry['max_price']:,}) because it's also missing for user {user_id}",
+            )
 
-        channel = bot.get_channel(alert["channel_id"])
-        if not channel:
-            try:
-                channel = await bot.fetch_channel(alert["channel_id"])
-            except Exception as e:
-                pretty_log(
-                    "warn", f"Failed to fetch channel {alert['channel_id']}: {e}"
-                )
-                continue
-        debug_log(f"Resolved channel {channel.id} for alert")
+        # 🪞 Channel logic
+        if has_market and has_missing:
+            target_channel_id = market_alert_entry["channel_id"]
+        elif has_market:
+            target_channel_id = market_alert_entry["channel_id"]
+        else:
+            target_channel_id = missing_entry["channel_id"]
 
-        # Build embed
+        # 🧾 Build embed
         new_embed = discord.Embed(color=embed.color or 0x0855FB)
         if embed.thumbnail:
             new_embed.set_thumbnail(url=embed.thumbnail.url)
@@ -127,7 +156,6 @@ async def process_market_alert_message(
             name=embed_author_name,
             icon_url=embed.author.icon_url if embed.author else None,
         )
-
         new_embed.add_field(
             name="Buy Command (iPhone)", value=f"`;m b {original_id}`", inline=False
         )
@@ -141,32 +169,73 @@ async def process_market_alert_message(
             value_cleaned = re.sub(r"<a?:\w+:\d+>", PokeCoin, value)
             new_embed.add_field(name=name, value=value_cleaned)
 
-        new_embed.set_footer(
-            text=(
-                embed.footer.text
-                if embed.footer
-                else "Please check listing before purchase"
-            )
-        )
+        # 🌸 Footer message
+        if has_market and has_missing:
+            footer_note = "This Pokémon is also missing from your box! 🌷"
+        elif has_missing:
+            footer_note = "This Pokémon is missing from your box! 🌸"
+        else:
+            footer_note = "Please check listing before purchase 💫"
+        new_embed.set_footer(text=footer_note)
 
-        content = ""
-        if alert.get("role_id"):
-            guild = bot.get_guild(MAIN_SERVER_ID)
+        # 🩵 Try to fetch channel safely
+        channel = bot.get_channel(target_channel_id)
+        if not channel:
+            try:
+                channel = await bot.fetch_channel(target_channel_id)
+            except Exception as e:
+                pretty_log(
+                    "warn",
+                    f"Failed to fetch channel {target_channel_id} for user {user_id}: {e}",
+                )
+                continue
+
+        # 🏷️ Determine which role to ping
+        if has_market and has_missing:
+            target_role_id = market_alert_entry.get("role_id")
+        elif has_market:
+            target_role_id = market_alert_entry.get("role_id")
+        else:
+            target_role_id = missing_entry.get("role_id")
+
+        # 🪞 Try to resolve role safely (cache-friendly)
+        role_mention = ""
+        if target_role_id:
+            guild = channel.guild
             if guild:
-                role_key = (guild.id, alert["role_id"])
-                role = _role_cache.get(role_key) or guild.get_role(alert["role_id"])
+                role = _role_cache.get((guild.id, target_role_id))
+                if not role:
+                    try:
+                        role = guild.get_role(target_role_id) or await guild.fetch_role(
+                            target_role_id
+                        )
+                        _role_cache[(guild.id, target_role_id)] = role
+                    except Exception as e:
+                        pretty_log(
+                            "warn",
+                            f"Failed to fetch role {target_role_id} in guild {guild.id}: {e}",
+                        )
                 if role:
-                    _role_cache[role_key] = role
-                    content += role.mention + " "
-                    debug_log(f"Attached role mention: {role.name}")
+                    role_mention = role.mention
 
-        content += f"{poke_name} on market for {PokeCoin} {listed_price:,}"
+        # 💬 Compose message
+        content = (
+            f"{role_mention} {poke_name} on market for {PokeCoin} {listed_price:,}"
+        )
+        if has_missing and not has_market:
+            content = f"{role_mention} {poke_name} on market for {PokeCoin} {listed_price:,} — and it's missing from your box!"
+        elif has_market and has_missing:
+            content = f"{role_mention} {poke_name} is on the market for {PokeCoin} {listed_price:,} and is missing from your box too! 🌷"
 
+        # ✨ Send alert
         try:
-            await channel.send(content=content, embed=new_embed)
+            await channel.send(content=content.strip(), embed=new_embed)
             pretty_log(
                 "info",
-                f"Sent market alert for {poke_name} #{poke_dex} to channel {alert['channel_id']}",
+                f"Sent alert for {poke_name} (Dex {poke_dex}) → User {user_id} "
+                f"[market={has_market}, missing={has_missing}, role={target_role_id}]",
             )
         except Exception as e:
-            pretty_log("error", f"Failed to send market alert: {e}")
+            pretty_log(
+                "error", f"Failed to send combined alert for user {user_id}: {e}"
+            )

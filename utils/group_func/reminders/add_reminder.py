@@ -11,7 +11,7 @@ from utils.parsers.reminder_parser import parse_remind_on, parse_repeat_interval
 from utils.visuals.color_helpers import hex_to_dec
 from utils.visuals.design_embed import design_embed
 from utils.visuals.pretty_defer import pretty_defer, pretty_error
-
+from utils.group_func.reminders.timezone_db_func import fetch_user_timezone
 
 # 🌸───────────────────────────────────────────────🌸
 # 🩷⏰  REMINDER CREATION FUNCTION                 🩷
@@ -59,8 +59,15 @@ async def add_reminder_func(
             await loader.error(content=f"🎨 Invalid color: {error_msg}")
             return
 
+    # ⏱ Parse remind_on
+    tz_str = await fetch_user_timezone(bot=bot, user_id=user_id)
+    if not tz_str:
+        await loader.error(
+            content="You need to set your timezone first using `/reminder timezone`."
+        )
+
     # 🩷⏱ Parse remind_on
-    success, remind_on_ts, error_msg = parse_remind_on(remind_on)
+    success, remind_on_ts, error_msg = parse_remind_on(remind_on, tz_str)
     if not success:
         await loader.error(content=f"❌ {error_msg}")
         return

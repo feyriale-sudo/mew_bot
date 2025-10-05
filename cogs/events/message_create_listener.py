@@ -9,9 +9,17 @@ from discord.ext import commands
 
 from config.settings import *
 from utils.listener_func.market_alert_listener import process_market_alert_message
+from utils.listener_func.market_purchase_listener import get_purchased_pokemon
 from utils.logs.pretty_log import pretty_log
+from utils.listener_func.single_trade_listener import handle_single_trade_message
+from utils.listener_func.multi_trade_listener import handle_multitrade_message
 
+purchase_trigger = "<:checkedbox:752302633141665812> Successfully purchased"
+multi_trade_trigger = "<:checkedbox:752302633141665812> Trade complete! :handshake:"
 
+# 💜────────────────────────────────────────────
+#           🧩 Message Create Listener Cog
+# 💜────────────────────────────────────────────
 class MessageCreateListener(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -50,19 +58,32 @@ class MessageCreateListener(commands.Cog):
             ):
                 return
 
-            # --- Market alert processing only---
+            # 💖────────────────────────────────────────────
+            #           🛒 Purchase Processing Only
+            # 💖────────────────────────────────────────────
+            if message.content and purchase_trigger in message.content:
+                await get_purchased_pokemon(self.bot, message)
+
+            # 💖────────────────────────────────────────────
+            #           🤝 Single Trade Processing Only
+            # 💖────────────────────────────────────────────
+            if message.content and ":handshake:" in message.content:
+                await handle_single_trade_message(self.bot, message)
+
+            # 💖────────────────────────────────────────────
+            #           🤝 Multi Trade Processing Only
+            # 💖────────────────────────────────────────────
+            if message.content and multi_trade_trigger in message.content:
+                await handle_multitrade_message(self.bot, message)
+
+            # 💖────────────────────────────────────────────
+            #           📢 Market Alert Processing Only
+            # 💖────────────────────────────────────────────
             if (
                 message.guild
                 and message.guild.id == MAIN_SERVER_ID
                 and message.channel.category_id == Categories.Market_Feed
             ):
-                """pretty_log(
-                    "debug",
-                    f"Message caught: guild={message.guild.id if message.guild else None}, "
-                    f"channel_parent={message.channel.parent_id}, "
-                    f"author={message.author} ({message.author.id}), "
-                    f"webhook_id={message.webhook_id}",
-                )"""
 
                 await process_market_alert_message(
                     self.bot, message, Categories.Market_Feed

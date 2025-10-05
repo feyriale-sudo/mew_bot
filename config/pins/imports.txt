@@ -2,4 +2,9 @@ from utils.logs.pretty_log import pretty_log
 from utils.essentials.command_safe import run_command_safe
 from utils.visuals.pretty_defer import pretty_defer, pretty_error
 from utils.visuals.design_embed import design_embed
-from utils.parsers.number_parser import parse_compact_number 
+from utils.parsers.number_parser import parse_compact_number
+
+
+# ❀─────────────────────────────────────────❀
+#      💖  Get Pokemeow Reply
+# ❀─────────────────────────────────────────❀

@@ -4,9 +4,9 @@
 # 💜────────────────────────────────────────────
 
 from utils.cache.market_alert_cache import load_market_alert_cache
-from utils.cache.cache_list import market_alert_cache
+from utils.cache.cache_list import market_alert_cache, missing_pokemon_cache
 from utils.logs.pretty_log import pretty_log
-
+from utils.cache.missing_pokemon_cache import load_missing_pokemon_cache
 # 💜────────────────────────────────────────────
 #     🟣 Load Everything in One Go
 # 💜────────────────────────────────────────────
@@ -18,6 +18,9 @@ async def load_all_caches(bot):
     # 🌸 Load Market Alerts
     await load_market_alert_cache(bot)
 
+    # 🌸 Load Missing Pokémon
+    await load_missing_pokemon_cache(bot)
+
     # 🎀 Unified summary log
     pretty_log(
         tag="",
@@ -25,6 +28,7 @@ async def load_all_caches(bot):
         message=(
             f"All caches refreshed and loaded "
             f"(Market Alerts: {len(market_alert_cache)} ~{get_deep_size(market_alert_cache)//1024} KB + "
+            f"Missing Pokémon: {len(missing_pokemon_cache)} ~{get_deep_size(missing_pokemon_cache)//1024} KB)"
         ),
     )
 

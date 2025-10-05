@@ -26,6 +26,7 @@ MEW_TAGS = {
     "critical": "🚨 Critical",  # red for clarity
     "skip": "🩷 Skip",
     "sent": "📮 Sent",
+    "missing": "🐰 Missing Pokemon",
 }
 
 # 🎨 ANSI color palette (soft pinks + red/yellow highlights)

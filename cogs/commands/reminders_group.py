@@ -10,7 +10,7 @@ from discord.ext import commands
 from utils.essentials.command_safe import run_command_safe
 from utils.group_func.reminders import *
 from utils.group_func.reminders.reminders_db_func import reminder_id_autocomplete
-
+from utils.group_func.reminders.timezone_db_func import tz_autocomplete
 
 # 🎀────────────────────────────────────────────
 #    🌸 Reminders Group Command Cog Setup 🌸
@@ -25,6 +25,27 @@ class ReminderGroup(commands.Cog):
     reminder_group = app_commands.Group(
         name="reminder", description="Commands related to reminder"
     )
+
+    # 🤍─────────────────────────────────────────────
+    # 🪄 🌸 /reminder timezone 🌸
+    # 🤍─────────────────────────────────────────────
+    @reminder_group.command(
+        name="timezone", description="Sets a member's timezone for reminders"
+    )
+    @app_commands.autocomplete(timezone=tz_autocomplete)
+    async def reminder_set_timezone(
+        self,
+        interaction: discord.Interaction,
+        timezone: str,
+    ):
+
+        await run_command_safe(
+            bot=self.bot,
+            interaction=interaction,
+            slash_cmd_name="reminder timezone",
+            command_func=reminder_set_timezone_func,
+            timezone=timezone,
+        )
 
     # 🎀────────────────────────────────────────────
     #         7  🌸 /reminder add 🌸

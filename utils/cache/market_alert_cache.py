@@ -37,10 +37,6 @@ async def load_market_alert_cache(bot):
         )
         _market_alert_index[key] = alert_entry
 
-    """espeon_log(
-        "info",
-        f"[Market Alert Cache] After load → {len(market_alert_cache)} in list, {len(_market_alert_index)} in index (sample keys: {list(_market_alert_index.keys())[:3]})",
-    )"""
 
 
     return market_alert_cache
