@@ -13,10 +13,10 @@ from utils.listener_func.market_purchase_listener import get_purchased_pokemon
 from utils.logs.pretty_log import pretty_log
 from utils.listener_func.single_trade_listener import handle_single_trade_message
 from utils.listener_func.multi_trade_listener import handle_multitrade_message
-
+from utils.listener_func.dex_listener import dex_message_handler
 purchase_trigger = "<:checkedbox:752302633141665812> Successfully purchased"
 multi_trade_trigger = "<:checkedbox:752302633141665812> Trade complete! :handshake:"
-
+dex_trigger = ":dna: **Evolution line**"
 # 💜────────────────────────────────────────────
 #           🧩 Message Create Listener Cog
 # 💜────────────────────────────────────────────
@@ -75,6 +75,16 @@ class MessageCreateListener(commands.Cog):
             # 💖────────────────────────────────────────────
             if message.content and multi_trade_trigger in message.content:
                 await handle_multitrade_message(self.bot, message)
+
+            # 💖────────────────────────────────────────────
+            #           🧬 Dex Processing Only
+            # 💖────────────────────────────────────────────
+            if message.embeds and message.embeds[0]:
+                embed = message.embeds[0]
+                embed_description = embed.description
+                if embed_description and dex_trigger in embed_description:
+                    await dex_message_handler(self.bot, message)
+
 
             # 💖────────────────────────────────────────────
             #           📢 Market Alert Processing Only

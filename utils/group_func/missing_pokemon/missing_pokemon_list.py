@@ -3,6 +3,7 @@ from discord import app_commands
 from discord.ext import commands
 from discord.ui import Button, View
 
+from config.aesthetic import *
 from config.settings import Channels
 from utils.db.missing_pokemon_db_func import (
     fetch_user_missing_dict,
@@ -93,7 +94,12 @@ class MissingPokemonPaginator(View):
 
         # 🪞 Add footer with page info
         footer_text = f"Page {self.page + 1} of {self.max_page + 1}"
-        embed = await design_embed(user=self.user, embed=embed, footer_text=footer_text)
+        embed = await design_embed(
+            user=self.user,
+            embed=embed,
+            footer_text=footer_text,
+            thumbnail_url=Thumbnails.Missing_List,
+        )
         return embed
 
     async def on_timeout(self):

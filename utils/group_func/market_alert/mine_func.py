@@ -80,6 +80,7 @@ async def mine_market_alerts_func(bot, interaction: discord.Interaction):
                 embed=embed,
                 user=user,
                 footer_text="Use /market-alert add to create one ✨",
+                thumbnail_url=Thumbnails.Market_Mine,
             )
             await handle.success(embed=embed, content="")
             return
@@ -122,6 +123,7 @@ async def mine_market_alerts_func(bot, interaction: discord.Interaction):
 
             embed.add_field(name=field_name, value=field_value, inline=False)
             char_count += len(field_name) + len(field_value)
+            embed.set_thumbnail(url=Thumbnails.Market_Mine)
 
         embeds.append(embed)
 

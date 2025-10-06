@@ -9,6 +9,31 @@ from utils.cache.missing_pokemon_cache import (
 from utils.db.missing_pokemon_db_func import remove_missing_pokemon
 from utils.logs.pretty_log import pretty_log
 
+import discord
+
+# 🌸──────────────────────────────────────────────
+#   💖 Fetch Guild Member by Name (with Caching) 💖
+# 🌸──────────────────────────────────────────────
+async def fetch_member_by_name(guild: discord.Guild, name: str):
+    # Try cache first
+    member = discord.utils.find(
+        lambda m: m.name.lower() == name.lower()
+        or m.display_name.lower() == name.lower(),
+        guild.members,
+    )
+    if member:
+        return member
+
+    # Optional: attempt to fetch all members (requires privileged intent)
+    try:
+        async for m in guild.fetch_members(limit=None):
+            if m.name.lower() == name.lower() or m.display_name.lower() == name.lower():
+                return m
+    except Exception:
+        pass
+
+    return None
+
 
 # 🌸──────────────────────────────────────────────
 #   💖 Parse + Clean Up Multitrade Pokémon Entries
@@ -64,11 +89,10 @@ async def handle_multitrade_message(bot, message: discord.Message):
     else:
         final_received = received
 
-    # 💫 Cleanup step — remove received Pokémon from missing cache + DB
-    from utils.pokemeow.get_pokemeow_reply import get_pokemeow_reply_member
-
+    # 🌸 Get guild member
+    guild = message.guild
     for receiver_name, pokemons in final_received.items():
-        member = await get_pokemeow_reply_member(bot, receiver_name)
+        member =  await fetch_member_by_name(guild, receiver_name)
         if not member or not pokemons:
             continue
 
