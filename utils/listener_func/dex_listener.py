@@ -73,6 +73,8 @@ async def dex_message_handler(bot, message: discord.Message):
             # Remove from database
             await remove_missing_pokemon(bot, member, int(dex_number))
 
+            # Add reaction to the dex message
+            await message.add_reaction(Emojis.Pink_Check)
             # Add reaction to the original message
             replied_to_message = (
                 message.reference.resolved if message.reference else None

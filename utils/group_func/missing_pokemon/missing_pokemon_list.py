@@ -21,7 +21,7 @@ from utils.visuals.pretty_defer import pretty_defer, pretty_error
 # 🩷 ⏰ PAGINATED MISSING POKEMON LIST FUNCTION          🩷
 # 🌸───────────────────────────────────────────────🌸
 class MissingPokemonPaginator(View):
-    def __init__(self, bot, user, entries, per_page=10, timeout=120):
+    def __init__(self, bot, user, entries, per_page=20, timeout=120):
         super().__init__(timeout=timeout)
         self.bot = bot
         self.user = user

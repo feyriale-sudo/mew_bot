@@ -28,6 +28,7 @@ async def remove_market_alert_func(bot, interaction: discord.Interaction, pokemo
         remove_all_alerts_from_user,
     )
 
+    status_message = ""
     user = interaction.user
     user_id = user.id
     removed_alerts: list[tuple[str, str]] = []
