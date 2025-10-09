@@ -1,4 +1,5 @@
 from config.aesthetic import Emojis
+
 FISHING_COLOR = 0x87CEFA
 
 
@@ -36,4 +37,5 @@ rarity_meta = {
         "emoji": "❓",
     },
     "default": {"color": 0xA0D8F0},
+    "event_exclusive": {"color": 15345163},
 }

@@ -8,6 +8,7 @@ import discord
 from discord import Embed
 
 from config.aesthetic import Emojis
+from config.rarity import rarity_meta
 from config.settings import *
 from utils.cache.cache_list import (
     _market_alert_index,
@@ -26,6 +27,38 @@ ALLOWED_WEBHOOKS = {
     1422431013920837633,  # Shiny
     1422431171639378043,  # Golden
 }
+
+HIGH_VALUE_RARITY_COLOR_LIST = [
+    rarity_meta["legendary"]["color"],
+    rarity_meta["shiny"]["color"],
+    rarity_meta["event_exclusive"]["color"],
+    rarity_meta["golden"]["color"],
+]
+OTHER_EXCLUSIVES = [
+    "chingling",
+    "mimikyu",
+    "mimejr",
+    "happiny",
+    "chatot",
+    "munchlax",
+    "riolu",
+    "audino",
+    "zorua",
+    "emolga",
+    "ferroseed",
+    "golett",
+    "pawniard",
+    "pancham",
+    "spritzee",
+    "swirlix",
+    "noibat",
+    "crabrawler",
+    "rockruff",
+    "type-null",
+    "yamper",
+    "nickit",
+    "carbink",
+]
 
 # 🔹 Cache for roles
 _role_cache: dict[tuple[int, int], discord.Role] = {}
@@ -63,7 +96,7 @@ async def process_market_alert_message(
     match_price = re.search(r"(\d[\d,]*)", listed_price_str)
     listed_price = int(match_price.group(1).replace(",", "")) if match_price else 0
     original_id = fields.get("ID", "0")
-
+    embed_color = embed.color.value
     pretty_log(
         "debug",
         f"Processing market message: {poke_name} #{poke_dex} for {listed_price:,}",
@@ -72,30 +105,59 @@ async def process_market_alert_message(
     # 💎────────────────────────────────────────────
     #           🏪 Update Market Value Cache
     # 💎────────────────────────────────────────────
-    # Extract additional market data
-    lowest_market_str = re.sub(r"<a?:\w+:\d+>", "", fields.get("Lowest Market", "0"))
-    lowest_market_match = re.search(r"(\d[\d,]*)", lowest_market_str)
-    lowest_market = (
-        int(lowest_market_match.group(1).replace(",", "")) if lowest_market_match else 0
-    )
+    # If in high value rarity color list or in other exclusives, cache value
+    if (
+        embed_color in HIGH_VALUE_RARITY_COLOR_LIST
+        or poke_name.lower() in OTHER_EXCLUSIVES
+    ):
+        # Extract additional market data
+        lowest_market_str = re.sub(
+            r"<a?:\w+:\d+>", "", fields.get("Lowest Market", "0")
+        )
+        lowest_market_match = re.search(r"(\d[\d,]*)", lowest_market_str)
+        lowest_market = (
+            int(lowest_market_match.group(1).replace(",", ""))
+            if lowest_market_match
+            else 0
+        )
 
-    listing_seen = fields.get("Listing Seen", "Unknown")
+        listing_seen = fields.get("Listing Seen", "Unknown")
 
-    # Upsert into market value cache
-    cache_key = poke_name.lower()
-    market_value_cache[cache_key] = {
-        "pokemon": poke_name,
-        "dex": poke_dex,
-        "rarity": "unknown",  # Could extract from footer if available
-        "lowest_market": lowest_market,
-        "current_listing": listed_price,
-        "listing_seen": listing_seen,
-    }
+        # Upsert into market value cache
+        cache_key = poke_name.lower()
 
-    pretty_log(
-        "debug",
-        f"Updated market cache for {poke_name}: lowest={lowest_market:,}, current={listed_price:,}, seen={listing_seen} ",
-    )
+        # Get existing data to preserve true lowest price
+        existing_data = market_value_cache.get(cache_key, {})
+        existing_lowest = existing_data.get("true_lowest", float("inf"))
+
+        # Calculate the true lowest price among:
+        # 1. Current listing price
+        # 2. "Lowest Market" from embed
+        # 3. Previously tracked lowest
+        true_lowest = min(listed_price, lowest_market, existing_lowest)
+
+        # Only update if we have a valid price (not 0)
+        if true_lowest == float("inf") or true_lowest == 0:
+            true_lowest = (
+                max(listed_price, lowest_market)
+                if max(listed_price, lowest_market) > 0
+                else 0
+            )
+
+        market_value_cache[cache_key] = {
+            "pokemon": poke_name,
+            "dex": poke_dex,
+            "rarity": "unknown",  # Could extract from footer if available
+            "lowest_market": lowest_market,  # Original "Lowest Market" from embed
+            "current_listing": listed_price,
+            "true_lowest": true_lowest,  # Our calculated true lowest
+            "listing_seen": listing_seen,
+        }
+
+        pretty_log(
+            "debug",
+            f"Updated market cache for {poke_name}: embed_lowest={lowest_market:,}, current={listed_price:,}, true_lowest={true_lowest:,}, seen={listing_seen}",
+        )
 
     # 🧩 Build Market Index (if needed) - Fix the indexing structure
     # The cache loader uses 3-tuples, but we need pokemon-name lookup
