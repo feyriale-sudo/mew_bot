@@ -6,6 +6,11 @@ CC_GUILD_ID = 1220718310455250996
 class Channels:
     bot_logs = 1422414881944240148
     reminders = 1370878801277358080
+    rare_spawn = 1425655938760704070
 
 class Categories:
     Market_Feed = 1422415053294141472
+
+
+class Roles:
+    rare_spawn = 1425655985304764567

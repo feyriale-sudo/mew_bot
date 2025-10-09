@@ -13,6 +13,7 @@ from utils.cache.cache_list import (
     _market_alert_index,
     _missing_pokemon_index,
     market_alert_cache,
+    market_value_cache,
     missing_pokemon_cache,
 )
 from utils.logs.pretty_log import pretty_log
@@ -66,6 +67,34 @@ async def process_market_alert_message(
     pretty_log(
         "debug",
         f"Processing market message: {poke_name} #{poke_dex} for {listed_price:,}",
+    )
+
+    # 💎────────────────────────────────────────────
+    #           🏪 Update Market Value Cache
+    # 💎────────────────────────────────────────────
+    # Extract additional market data
+    lowest_market_str = re.sub(r"<a?:\w+:\d+>", "", fields.get("Lowest Market", "0"))
+    lowest_market_match = re.search(r"(\d[\d,]*)", lowest_market_str)
+    lowest_market = (
+        int(lowest_market_match.group(1).replace(",", "")) if lowest_market_match else 0
+    )
+
+    listing_seen = fields.get("Listing Seen", "Unknown")
+
+    # Upsert into market value cache
+    cache_key = poke_name.lower()
+    market_value_cache[cache_key] = {
+        "pokemon": poke_name,
+        "dex": poke_dex,
+        "rarity": "unknown",  # Could extract from footer if available
+        "lowest_market": lowest_market,
+        "current_listing": listed_price,
+        "listing_seen": listing_seen,
+    }
+
+    pretty_log(
+        "debug",
+        f"Updated market cache for {poke_name}: lowest={lowest_market:,}, current={listed_price:,}, seen={listing_seen} ",
     )
 
     # 🧩 Build Market Index (if needed) - Fix the indexing structure
