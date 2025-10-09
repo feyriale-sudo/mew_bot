@@ -33,6 +33,7 @@ HIGH_VALUE_RARITY_COLOR_LIST = [
     rarity_meta["shiny"]["color"],
     rarity_meta["event_exclusive"]["color"],
     rarity_meta["golden"]["color"],
+    rarity_meta["gigantamax"]["color"],
 ]
 OTHER_EXCLUSIVES = [
     "chingling",
@@ -59,7 +60,14 @@ OTHER_EXCLUSIVES = [
     "nickit",
     "carbink",
 ]
-
+HIGH_VALUE_PREFIX = [
+    "mega ",
+    "shiny mega ",
+    "gigantamax-",
+    "shiny gigantamax-",
+    "eternamax-",
+    "shiny eternamax-",
+]
 # 🔹 Cache for roles
 _role_cache: dict[tuple[int, int], discord.Role] = {}
 
@@ -109,6 +117,7 @@ async def process_market_alert_message(
     if (
         embed_color in HIGH_VALUE_RARITY_COLOR_LIST
         or poke_name.lower() in OTHER_EXCLUSIVES
+        or any(prefix in poke_name.lower() for prefix in HIGH_VALUE_PREFIX)
     ):
         # Extract additional market data
         lowest_market_str = re.sub(

@@ -38,4 +38,6 @@ rarity_meta = {
     },
     "default": {"color": 0xA0D8F0},
     "event_exclusive": {"color": 15345163},
+    "gigantamax" : {"color": 10685254},
+    
 }
