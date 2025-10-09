@@ -38,6 +38,32 @@ rarity_meta = {
     },
     "default": {"color": 0xA0D8F0},
     "event_exclusive": {"color": 15345163},
-    "gigantamax" : {"color": 10685254},
-    
+    "gigantamax": {"color": 10685254},
 }
+
+FOOTER_TEXT = {
+    "caught": "Congratulations! Keep it up ✨",
+    "broke_out": "Aww! Better luck next time 🩷",
+    "ran_away": "Oh, no! It got away from you 💨",
+}
+RARE_SPAWN_COLORS = {
+    "legendary": rarity_meta["legendary"]["color"],
+    "shiny": rarity_meta["shiny"]["color"],
+    "event_exclusive": 15345163,
+}
+FISHING_RARITY_TRIGGERS = ["Shiny", "Golden", "Kyogre", "Suicune"]
+CONTEXT_MAP = {
+    "caught": {
+        "footer": FOOTER_TEXT["caught"],
+        "emoji": Emojis.Catched,
+    },
+    "broke_out": {
+        "footer": FOOTER_TEXT["broke_out"],
+        "emoji": Emojis.Fled,
+    },
+    "ran_away": {
+        "footer": FOOTER_TEXT["ran_away"],
+        "emoji": Emojis.Fled,
+    },
+}
+

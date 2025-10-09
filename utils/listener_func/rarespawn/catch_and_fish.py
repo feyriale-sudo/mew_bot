@@ -3,37 +3,13 @@ import re
 import discord
 
 from config.aesthetic import Emojis
-from config.rarity import FISHING_COLOR, rarity_meta
+from config.rarity import *
 from config.settings import Channels, Roles
 from utils.cache.cache_list import market_value_cache
 from utils.logs.pretty_log import pretty_log
 from utils.pokemeow.get_pokemeow_reply import get_pokemeow_reply_member
 
-FOOTER_TEXT = {
-    "caught": "Congratulations! Keep it up ✨",
-    "broke_out": "Aww! Better luck next time 🩷",
-    "ran_away": "Oh, no! It got away from you 💨",
-}
-RARE_SPAWN_COLORS = {
-    "legendary": rarity_meta["legendary"]["color"],
-    "shiny": rarity_meta["shiny"]["color"],
-    "event_exclusive": 15345163,
-}
-FISHING_RARITY_TRIGGERS = ["Shiny", "Golden", "Kyogre", "Suicune"]
-CONTEXT_MAP = {
-    "caught": {
-        "footer": FOOTER_TEXT["caught"],
-        "emoji": Emojis.Catched,
-    },
-    "broke_out": {
-        "footer": FOOTER_TEXT["broke_out"],
-        "emoji": Emojis.Fled,
-    },
-    "ran_away": {
-        "footer": FOOTER_TEXT["ran_away"],
-        "emoji": Emojis.Fled,
-    },
-}
+
 
 
 # ❀─────────────────────────────────────────❀
@@ -51,7 +27,6 @@ async def catch_and_fish_message_rare_spawn_handler(
 
     embed_color = embed.color.value
     embed_description = embed.description or ""
-
 
     # Check if it's NOT a rare spawn color, or if it's fishing but doesn't contain rarity triggers
     if embed_color not in RARE_SPAWN_COLORS.values() or (
@@ -148,7 +123,6 @@ async def catch_and_fish_message_rare_spawn_handler(
     content, embed = build_rare_spawn_embed(
         message=after,
         member=member,
-        rarity=rarity,
         pokemon_name=display_pokemon_name,
         context=context,
         image_url=image_url,
@@ -164,11 +138,12 @@ async def catch_and_fish_message_rare_spawn_handler(
             f"Posted rare spawn of {pokemon_name} ({context}) for {member.display_name} in #{rarespawn_channel.name}",
         )
 
-
+# 💖─────────────────────────────────────────💖
+#     Build Rare Spawn Embed
+# 💖─────────────────────────────────────────💖
 def build_rare_spawn_embed(
     message: discord.Message,
     member: discord.Member,
-    rarity: str,
     pokemon_name: str,
     raw_pokemon_name: str,
     context: str,

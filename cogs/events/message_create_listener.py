@@ -8,15 +8,19 @@ import discord
 from discord.ext import commands
 
 from config.settings import *
+from utils.listener_func.dex_listener import dex_message_handler
 from utils.listener_func.market_alert_listener import process_market_alert_message
 from utils.listener_func.market_purchase_listener import get_purchased_pokemon
-from utils.logs.pretty_log import pretty_log
-from utils.listener_func.single_trade_listener import handle_single_trade_message
 from utils.listener_func.multi_trade_listener import handle_multitrade_message
-from utils.listener_func.dex_listener import dex_message_handler
+from utils.listener_func.rarespawn.egg_hatch_rs import egg_rarespawn_handler
+from utils.listener_func.single_trade_listener import handle_single_trade_message
+from utils.logs.pretty_log import pretty_log
+from utils.listener_func.rarespawn.swap_rare_spawn import swap_rarespawn_handler
 purchase_trigger = "<:checkedbox:752302633141665812> Successfully purchased"
 multi_trade_trigger = "<:checkedbox:752302633141665812> Trade complete! :handshake:"
 dex_trigger = ":dna: **Evolution line**"
+
+
 # 💜────────────────────────────────────────────
 #           🧩 Message Create Listener Cog
 # 💜────────────────────────────────────────────
@@ -84,8 +88,35 @@ class MessageCreateListener(commands.Cog):
                 embed_description = embed.description
                 if embed_description and dex_trigger in embed_description:
                     await dex_message_handler(self.bot, message)
+            # 💖────────────────────────────────────────────
+            #           🐣 Egg Hatch Rare Spawn Processing Only
+            # 💖────────────────────────────────────────────
+            # User hatched an Egg! in author text
+            if (
+                message.embeds
+                and message.embeds[0]
+                and message.content
+                and message.embeds[0].author
+                and "hatched an Egg!" in (message.embeds[0].author.name or "")
+                and "just hatched a" in message.content
+            ):
+                await egg_rarespawn_handler(self.bot, message)
 
-
+            # 💖────────────────────────────────────────────
+            #           🔄 Swap Rare Spawn Processing Only
+            # 💖────────────────────────────────────────────
+            if (
+                message.embeds
+                and message.embeds[0]
+                and message.content
+                and message.embeds[0].author
+                and "PokeMeow Swaps" in (message.embeds[0].author.name or "")
+                and (
+                    "received:" in message.content
+                    or "from a swap" in message.content.lower()
+                )
+            ):
+                await swap_rarespawn_handler(self.bot, message)
             # 💖────────────────────────────────────────────
             #           📢 Market Alert Processing Only
             # 💖────────────────────────────────────────────
