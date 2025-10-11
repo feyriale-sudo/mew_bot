@@ -81,8 +81,8 @@ async def catch_and_fish_message_rare_spawn_handler(
 
     rarity = ""
     raw_pokemon_name = pokemon_name.lower()  # Store original for cache lookup
-
-    display_pokemon_name = ""
+    rarity_emoji = ""
+    display_pokemon_name = None
     if spawn_type == "fish":
         if "shiny" in pokemon_name.lower():
             rarity = "shiny"
@@ -100,7 +100,6 @@ async def catch_and_fish_message_rare_spawn_handler(
             rarity = "legendary"
         elif embed_color == rarity_meta["shiny"]["color"]:
             rarity = "shiny"
-            raw_pokemon_name = f"shiny {pokemon_name.lower()}"  # Shiny spawns need "shiny" prefix for cache
         elif embed_color != rarity_meta["event_exclusive"]["color"]:
             # Extract rarity from embed footer
             if embed.footer and embed.footer.text:
@@ -116,8 +115,8 @@ async def catch_and_fish_message_rare_spawn_handler(
                     pretty_log(
                         "debug", f"Could not extract rarity from footer: {footer_text}"
                     )
-
-    display_pokemon_name = f"{rarity_meta[rarity]['emoji']} {pokemon_name.title()}"
+    rarity_emoji = rarity_meta.get(rarity, {}).get("emoji", "")
+    display_pokemon_name = pokemon_name.title()
     image_url = embed.image.url if embed.image else None
 
     content, embed = build_rare_spawn_embed(
@@ -145,12 +144,13 @@ def build_rare_spawn_embed(
     message: discord.Message,
     member: discord.Member,
     pokemon_name: str,
+    rarity_emoji: str ,
     raw_pokemon_name: str,
     context: str,
     image_url: str,
     color,
 ):
-    content = f"Attention all <@&{Roles.rare_spawn}> — {member.mention} has found a [{pokemon_name}]({message.jump_url})!"
+    content = f"Attention all <@&{Roles.rare_spawn}> — {member.mention} has found a {rarity_emoji} [{pokemon_name}]({message.jump_url})!"
     footer_text = CONTEXT_MAP[context]["footer"]
     catch_status = CONTEXT_MAP[context]["emoji"]
 

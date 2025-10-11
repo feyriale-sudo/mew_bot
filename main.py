@@ -163,13 +163,18 @@ async def startup_tasks():
 #      💖  Startup Checklist 💖
 # ❀───────────────────────────────❀
 async def startup_checklist(bot: commands.Bot):
-    from utils.cache.cache_list import market_alert_cache, missing_pokemon_cache
+    from utils.cache.cache_list import (
+        market_alert_cache,
+        missing_pokemon_cache,
+        timer_cache,
+    )
 
     # ❀ This divider stays untouched ❀
     print("\n୨୧ ⏔⏔⏔⏔⏔⏔⏔⏔⏔⏔⏔⏔♡⏔⏔⏔⏔⏔⏔⏔⏔⏔⏔⏔⏔ ୨୧")
     print(f"✅ {len(bot.cogs)} 🌷 Cogs Loaded")
     print(f"✅ {len(market_alert_cache)} 🦄 Market Alerts")
     print(f"✅ {len(missing_pokemon_cache)} 🐰 Missing Pokémon Alerts")
+    print(f"✅ {len(timer_cache)} ⌚ Timer Settings Loaded")
     print(f"✅ {status_rotator.is_running()} 👒 Status Rotator Running")
     print(f"✅ {startup_tasks.is_running()} 💄  Startup Tasks Running")
     pg_status = "Ready" if hasattr(bot, "pg_pool") else "Not Ready"

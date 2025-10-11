@@ -3,7 +3,9 @@ from discord.ext import commands
 from utils.logs.pretty_log import pretty_log
 import traceback
 
-
+# 💜────────────────────────────────────────────
+#       🟣 Command Safe Runner 🟣
+# 💜────────────────────────────────────────────
 async def run_command_safe(
     bot,
     interaction: discord.Interaction,

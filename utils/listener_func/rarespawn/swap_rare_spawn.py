@@ -84,11 +84,8 @@ async def swap_rarespawn_handler(bot, message: discord.Message):
                 break
 
     # Build display name with emoji
-    if rarity in rarity_meta:
-        display_pokemon_name = f"{rarity_meta[rarity]['emoji']} {pokemon_name.title()}"
-    else:
-        display_pokemon_name = pokemon_name.title()
-
+    display_pokemon_name = pokemon_name.title()
+    rarity_emoji = rarity_meta.get(rarity, {}).get("emoji", "")
     # Get image URL from embed
     image_url = embed.image.url if embed and embed.image else None
 
@@ -104,6 +101,7 @@ async def swap_rarespawn_handler(bot, message: discord.Message):
         image_url=image_url,
         color=embed_color or rarity_meta.get(rarity, {}).get("color", 0x000000),
         raw_pokemon_name=raw_pokemon_name,
+        rarity_emoji=rarity_emoji,
     )
 
     # Send to rare spawn channel

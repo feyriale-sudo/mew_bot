@@ -1,4 +1,7 @@
 class Emojis:
+    battle_timer = "<a:battle:1426528643965911140>"
+    Pokemon_Timer_React = "<:pokemon:1426529272553803786>"
+    fish_spawn = "<a:fish:1426528601813286912>"
     Pink_Loading = "<a:loading:1423481968057647304>"
     Pink_Check = "<a:checkmark:1423481884570030180>"
     Pink_Error = "<:exclamation:1423482001482317864>"

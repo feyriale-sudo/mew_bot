@@ -90,7 +90,8 @@ async def egg_rarespawn_handler(bot, message: discord.Message):
     elif pokemon_name.lower() in SUPER_RARE_EGG_EXCLUSIVE:
         rarity = "superrare"
 
-    display_pokemon_name = f"{rarity_meta[rarity]['emoji']} {pokemon_name.title()}"
+    rarity_emoji = rarity_meta.get(rarity, {}).get("emoji", "")
+    display_pokemon_name = pokemon_name.title()
     context = "caught"  # Using "caught" context for egg hatches
 
     content, embed = build_rare_spawn_embed(
@@ -101,6 +102,7 @@ async def egg_rarespawn_handler(bot, message: discord.Message):
         image_url=image_url,
         color=embed_color,
         raw_pokemon_name=raw_pokemon_name,
+        rarity_emoji=rarity_emoji
     )
 
     rarespawn_channel = bot.get_channel(Channels.rare_spawn)  # Use bot.get_channel
