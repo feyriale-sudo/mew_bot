@@ -61,11 +61,15 @@ class MessageEditListener(commands.Cog):
             embed = after.embeds[0]
             embed_desc = embed.description if embed else ""
 
-            # Process fish rarity embed updates
+            # 💜────────────────────────────────────────────
+            #     🎣  Fish Rarity Embed Handler
+            # 💜────────────────────────────────────────────
             if embed_desc and "fished a wild" in embed_desc:
                 await fish_rarity_embed(self.bot, before, after)
 
-            # Process rare spawns - only if embed description contains trigger phrases
+            # 💜────────────────────────────────────────────
+            #     Rare Spawn Catch and Fish Handler
+            # 💜────────────────────────────────────────────
             if embed_desc and any(
                 trigger in embed_desc for trigger in RARE_SPAWN_TRIGGERS
             ):

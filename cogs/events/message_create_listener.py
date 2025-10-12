@@ -18,6 +18,7 @@ from utils.listener_func.catchbot_listener import (
 )
 from utils.listener_func.dex_listener import dex_message_handler
 from utils.listener_func.fish_timer import fish_timer_handler
+from utils.listener_func.held_item_ping import held_item_ping
 from utils.listener_func.market_alert_listener import process_market_alert_message
 from utils.listener_func.market_purchase_listener import get_purchased_pokemon
 from utils.listener_func.multi_trade_listener import handle_multitrade_message
@@ -42,6 +43,7 @@ CATCHBOT_SPENT_PATTERN = re.compile(
     r"You spent <:[^:]+:\d+> \*\*[\d,]+ PokeCoins\*\* to run your catch bot\.",
     re.IGNORECASE,
 )
+held_item_trigger = "<:held_item:"
 
 
 # 💜────────────────────────────────────────────
@@ -179,6 +181,17 @@ class MessageCreateListener(commands.Cog):
                 await battle_timer_handler(self.bot, message)
 
             # 💜────────────────────────────────────────────
+            #           🎒 Held Item Ping Processing Only
+            # 💜────────────────────────────────────────────
+            if (
+                message.embeds
+                and message.embeds[0]
+                and message.embeds[0].description
+                and held_item_trigger in message.embeds[0].description
+            ):
+                await held_item_ping(message)
+                
+            # 💜────────────────────────────────────────────
             #           🤖 CatchBot Processing Only
             # 💜────────────────────────────────────────────
             if message.content:
@@ -225,9 +238,7 @@ class MessageCreateListener(commands.Cog):
                             "embed",
                             f"Matched CatchBot checklist trigger in embed footer: {footer_text}",
                         )
-                        await handle_cb_checklist_message(
-                            bot=self.bot, message=message
-                        )
+                        await handle_cb_checklist_message(bot=self.bot, message=message)
         except Exception as e:
             pretty_log(
                 "critical",

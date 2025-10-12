@@ -10,8 +10,6 @@ from utils.logs.pretty_log import pretty_log
 from utils.pokemeow.get_pokemeow_reply import get_pokemeow_reply_member
 
 
-
-
 # ❀─────────────────────────────────────────❀
 #      💖  Catch and Fish Listener
 # ❀─────────────────────────────────────────❀
@@ -33,7 +31,6 @@ async def catch_and_fish_message_rare_spawn_handler(
         embed_color == FISHING_COLOR
         and not any(trigger in embed_description for trigger in FISHING_RARITY_TRIGGERS)
     ):
-        pretty_log("debug", f"Skipping - not rare color or fishing without triggers")
         return
 
     # Get Member
@@ -138,6 +135,7 @@ async def catch_and_fish_message_rare_spawn_handler(
             f"Posted rare spawn of {pokemon_name} ({context}) for {member.display_name} in #{rarespawn_channel.name}",
         )
 
+
 # 💖─────────────────────────────────────────💖
 #     Build Rare Spawn Embed
 # 💖─────────────────────────────────────────💖
@@ -145,7 +143,7 @@ def build_rare_spawn_embed(
     message: discord.Message,
     member: discord.Member,
     pokemon_name: str,
-    rarity_emoji: str ,
+    rarity_emoji: str,
     raw_pokemon_name: str,
     context: str,
     image_url: str,

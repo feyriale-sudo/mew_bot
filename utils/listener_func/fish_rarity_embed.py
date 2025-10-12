@@ -180,7 +180,7 @@ async def fish_rarity_embed(
 
     debug_log(f"Creating embed - name: {display_fish_name}, color: {embed_color}")
 
-    desc = f"{Emojis.fish_embed} {user.display_name} found a {display_fish_name}!"
+    desc = f"{Emojis.fish_embed} {user.mention} found a {display_fish_name}!"
     embed = discord.Embed(description=desc, color=embed_color)
 
     debug_log("Sending fish rarity embed", highlight=True)

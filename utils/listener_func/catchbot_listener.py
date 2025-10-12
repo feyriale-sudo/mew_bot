@@ -9,7 +9,7 @@ from utils.cache.cache_list import timer_cache
 from utils.db.schedule_db_func import delete_user_schedule, upsert_user_schedule
 from utils.logs.pretty_log import pretty_log
 from utils.pokemeow.get_pokemeow_reply import get_pokemeow_reply_member
-
+from config.aesthetic import Emojis
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 🎀 Regex Patterns
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -63,7 +63,7 @@ async def handle_cb_checklist_message(bot: commands.Bot, message: discord.Messag
     # 📅 React only if new schedule
     if result == "added":
         try:
-            await message.reference.resolved.add_reaction("📅")
+            await message.reference.resolved.add_reaction(Emojis.sched_react)
         except Exception as e:
             pretty_log(
                 tag="warn",
@@ -140,7 +140,7 @@ async def handle_cb_command_embed(bot: commands.Bot, message: discord.Message):
     # 📅 React only if new schedule
     if result == "added":
         try:
-            await message.reference.resolved.add_reaction("📅")
+            await message.reference.resolved.add_reaction(Emojis.sched_react)
         except Exception as e:
             pretty_log(
                 tag="warn",
@@ -198,7 +198,7 @@ async def handle_cb_run_message(bot, message: discord.Message):
         # 📅 React if new schedule added
         if result == "added":
             try:
-                await message.reference.resolved.add_reaction("📅")
+                await message.reference.resolved.add_reaction(Emojis.sched_react)
             except Exception as e:
                 pretty_log(
                     tag="warn",

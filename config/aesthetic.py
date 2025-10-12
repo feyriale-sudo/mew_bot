@@ -1,4 +1,6 @@
 class Emojis:
+    item_hold = " <:item:1426853964762054676>"
+    sched_react = "<:cbreact:1426841452826202183>"
     quest = "<a:quest:1426528728619417671>"
     catchbot = "<a:catchbot:1426528782684131410>"
     fish_faction = "<:fishfaction:1426667455547445268>"
