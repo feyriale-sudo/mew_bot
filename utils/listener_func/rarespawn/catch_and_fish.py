@@ -127,6 +127,7 @@ async def catch_and_fish_message_rare_spawn_handler(
         image_url=image_url,
         color=embed_color,
         raw_pokemon_name=raw_pokemon_name,
+        rarity_emoji=rarity_emoji,
     )
 
     rarespawn_channel = member.guild.get_channel(Channels.rare_spawn)
