@@ -35,9 +35,9 @@ async def load_schedule_cache(bot):
     # 🌸 Debug log
     total_reminders = sum(len(reminders) for reminders in schedule_cache.values())
     pretty_log(
-        tag="cache",
+        tag="",
         message=f"Loaded {len(schedule_cache)} users with {total_reminders} total reminders into cache",
-        label="🗂 SCHEDULE CACHE",
+        label="📅 SCHEDULE CACHE",
         bot=bot,
     )
 

@@ -4,6 +4,7 @@ from discord.ext import commands
 
 # 🧹 Import your scheduled tasks
 from utils.background_task.user_reminders_checker import process_due_reminders
+from utils.background_task.pokemeow_schedule_checker import pokemeow_schedule_checker
 from utils.logs.pretty_log import pretty_log
 
 
@@ -47,6 +48,9 @@ class CentralLoop(commands.Cog):
                 # 🦭 Check if any user reminder is due
                 await process_due_reminders(self.bot)
 
+                # 🐱 Check if any Pokemeow schedule reminder is due
+                await pokemeow_schedule_checker(self.bot)
+
             except Exception as e:
                 pretty_log(
                     "error",
@@ -73,5 +77,6 @@ async def setup(bot: commands.Bot):
     print("\n[📋 CENTRAL LOOP CHECKLIST] Scheduled tasks loaded:")
     print("  ─────────────────────────────────────────────")
     print("  ✅ 🧭  process_due_reminders")
+    print("  ✅ 🐱  pokemeow_schedule_checker")
     print("  🍭 CentralLoop ticking every 60 seconds!")
     print("  ─────────────────────────────────────────────\n")

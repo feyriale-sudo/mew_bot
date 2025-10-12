@@ -29,6 +29,8 @@ MEW_TAGS = {
     "missing": "🐰 Missing Pokemon",
     "debug": "🍑 Debug",
     "cache": "🍥 Cache",
+    "sync": "🌼 Sync",
+    "market_alert": "🦄 Market Alert",
 }
 
 # 🎨 ANSI color palette (soft pinks + red/yellow highlights)

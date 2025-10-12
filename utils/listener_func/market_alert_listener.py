@@ -18,6 +18,7 @@ from utils.cache.cache_list import (
     missing_pokemon_cache,
 )
 from utils.logs.pretty_log import pretty_log
+from utils.db.market_value_db_func import set_market_value
 
 PokeCoin = Emojis.PokeCoin
 
@@ -105,13 +106,10 @@ async def process_market_alert_message(
     listed_price = int(match_price.group(1).replace(",", "")) if match_price else 0
     original_id = fields.get("ID", "0")
     embed_color = embed.color.value
-    pretty_log(
-        "debug",
-        f"Processing market message: {poke_name} #{poke_dex} for {listed_price:,}",
-    )
+
 
     # 💎────────────────────────────────────────────
-    #           🏪 Update Market Value Cache
+    #           🏪 Update Market Value Cache & DB
     # 💎────────────────────────────────────────────
     # If in high value rarity color list or in other exclusives, cache value
     if (
@@ -153,6 +151,7 @@ async def process_market_alert_message(
                 else 0
             )
 
+        # Update cache
         market_value_cache[cache_key] = {
             "pokemon": poke_name,
             "dex": poke_dex,
@@ -163,9 +162,21 @@ async def process_market_alert_message(
             "listing_seen": listing_seen,
         }
 
+        # Update database immediately for high-value Pokémon
+        await set_market_value(
+            bot,
+            pokemon_name=poke_name,
+            dex_number=poke_dex,
+            rarity="unknown",
+            lowest_market=lowest_market,
+            current_listing=listed_price,
+            true_lowest=true_lowest,
+            listing_seen=listing_seen,
+        )
+
         pretty_log(
             "debug",
-            f"Updated market cache for {poke_name}: embed_lowest={lowest_market:,}, current={listed_price:,}, true_lowest={true_lowest:,}, seen={listing_seen}",
+            f"Updated market cache & DB for {poke_name}: embed_lowest={lowest_market:,}, current={listed_price:,}, true_lowest={true_lowest:,}, seen={listing_seen}",
         )
 
     # 🧩 Build Market Index (if needed) - Fix the indexing structure

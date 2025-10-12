@@ -1,4 +1,8 @@
 class Emojis:
+    quest = "<a:quest:1426528728619417671>"
+    catchbot = "<a:catchbot:1426528782684131410>"
+    fish_faction = "<:fishfaction:1426667455547445268>"
+    fish_embed = "<a:fishembed:1426671706596184078>"
     battle_timer = "<a:battle:1426528643965911140>"
     Pokemon_Timer_React = "<:pokemon:1426529272553803786>"
     fish_spawn = "<a:fish:1426528601813286912>"

@@ -8,6 +8,7 @@ import discord
 from discord.ext import commands
 
 from config.settings import *
+from utils.listener_func.fish_rarity_embed import fish_rarity_embed
 from utils.listener_func.rarespawn.catch_and_fish import (
     catch_and_fish_message_rare_spawn_handler,
 )
@@ -59,6 +60,10 @@ class MessageEditListener(commands.Cog):
 
             embed = after.embeds[0]
             embed_desc = embed.description if embed else ""
+
+            # Process fish rarity embed updates
+            if embed_desc and "fished a wild" in embed_desc:
+                await fish_rarity_embed(self.bot, before, after)
 
             # Process rare spawns - only if embed description contains trigger phrases
             if embed_desc and any(

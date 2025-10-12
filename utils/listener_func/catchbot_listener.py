@@ -5,10 +5,10 @@ import discord
 from discord.ext import commands
 
 from config.settings import POKEMEOW_APPLICATION_ID
-from utils.db.schedule_db_func import upsert_user_schedule, delete_user_schedule
+from utils.cache.cache_list import timer_cache
+from utils.db.schedule_db_func import delete_user_schedule, upsert_user_schedule
 from utils.logs.pretty_log import pretty_log
 from utils.pokemeow.get_pokemeow_reply import get_pokemeow_reply_member
-from utils.cache.cache_list import timer_cache
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 🎀 Regex Patterns
@@ -57,7 +57,7 @@ async def handle_cb_checklist_message(bot: commands.Bot, message: discord.Messag
 
     # 🗂️ Save schedule
     result = await extract_and_save_catchbot_schedule(
-        bot=bot, user=member, timestamp=timestamp
+        bot=bot, user=member, timestamp=timestamp, channel_id=message.channel.id
     )
 
     # 📅 React only if new schedule
@@ -134,7 +134,7 @@ async def handle_cb_command_embed(bot: commands.Bot, message: discord.Message):
 
     # 🗂️ Save schedule
     result = await extract_and_save_catchbot_schedule(
-        bot=bot, user=member, timestamp=timestamp
+        bot=bot, user=member, timestamp=timestamp, channel_id=message.channel.id
     )
 
     # 📅 React only if new schedule
@@ -159,6 +159,11 @@ async def handle_cb_command_embed(bot: commands.Bot, message: discord.Message):
 # 🎀 ;cb run
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def handle_cb_run_message(bot, message: discord.Message):
+    pretty_log(
+        tag="info",
+        message=f"[CB RUN] Entered handle_cb_run_message for message {message.id}",
+        bot=bot,
+    )
     try:
         if message.author.id != POKEMEOW_APPLICATION_ID:
             return None
@@ -188,7 +193,7 @@ async def handle_cb_run_message(bot, message: discord.Message):
         timestamp = int(message.created_at.timestamp()) + seconds
 
         # 🗂️ Save schedule
-        result = await extract_and_save_catchbot_schedule(bot, user, timestamp)
+        result = await extract_and_save_catchbot_schedule(bot, user, timestamp, message.channel.id)
 
         # 📅 React if new schedule added
         if result == "added":
@@ -259,7 +264,7 @@ async def handle_cb_return_message(bot, message: discord.Message):
 # Shared save logic
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def extract_and_save_catchbot_schedule(
-    bot, user: discord.User | discord.Member, timestamp: int
+    bot, user: discord.User | discord.Member, timestamp: int, channel_id: int
 ) -> str:
     """
     Upsert user's catchbot schedule and update cache.
@@ -311,12 +316,13 @@ async def extract_and_save_catchbot_schedule(
             user_name=user.name,
             type_="catchbot",
             scheduled_on=timestamp,
+            channel_id=channel_id,
         )
 
         # 🗃️ Update cache - Remove old and fetch fresh
         from utils.cache.schedule_cache import (
-            remove_schedule_cached,
             fetch_user_schedules_cached,
+            remove_schedule_cached,
         )
 
         remove_schedule_cached(user.id, "catchbot")

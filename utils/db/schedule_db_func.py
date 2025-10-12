@@ -11,7 +11,7 @@ async def fetch_all_schedules(bot) -> list[dict]:
         async with bot.pg_pool.acquire() as conn:
             rows = await conn.fetch(
                 """
-                SELECT reminder_id, user_id, user_name, type, scheduled_on
+                SELECT reminder_id, user_id, user_name, type, scheduled_on, channel_id
                 FROM pokemeow_reminders_schedule
                 """
             )
@@ -21,12 +21,15 @@ async def fetch_all_schedules(bot) -> list[dict]:
         return []
 
 
+# ────────────────────────────────────────────
+#   🐱 Fetch Single User Schedule Row by Type
+# ────────────────────────────────────────────
 async def fetch_user_schedule(bot, user_id: int, type_: str) -> Optional[dict]:
     try:
         async with bot.pg_pool.acquire() as conn:
             row = await conn.fetchrow(
                 """
-                SELECT reminder_id, user_id, user_name, type, scheduled_on
+                SELECT reminder_id, user_id, user_name, type, scheduled_on, channel_id
                 FROM pokemeow_reminders_schedule
                 WHERE user_id=$1 AND type=$2
                 """,
@@ -47,15 +50,11 @@ async def fetch_user_schedule(bot, user_id: int, type_: str) -> Optional[dict]:
 #   🐱 Fetch User Schedule Rows
 # ────────────────────────────────────────────
 async def fetch_user_schedules(bot, user_id: int) -> List[dict]:
-    """
-    Fetch all reminder rows for a given user_id.
-    Returns a list of dicts.
-    """
     try:
         async with bot.pg_pool.acquire() as conn:
             rows = await conn.fetch(
                 """
-                SELECT reminder_id, user_id, user_name, type, scheduled_on
+                SELECT reminder_id, user_id, user_name, type, scheduled_on, channel_id
                 FROM pokemeow_reminders_schedule
                 WHERE user_id = $1
                 """,
@@ -131,30 +130,33 @@ async def upsert_user_schedule(
     user_name: str,
     type_: str,
     scheduled_on: int,
+    channel_id: int = None,
 ):
     """
     Insert or update a user's reminder schedule.
-    Simplified to only store when the reminder should trigger.
+    Now includes channel_id.
     """
     try:
         async with bot.pg_pool.acquire() as conn:
             await conn.execute(
                 """
-                INSERT INTO pokemeow_reminders_schedule (user_id, user_name, type, scheduled_on)
-                VALUES ($1, $2, $3, $4)
+                INSERT INTO pokemeow_reminders_schedule (user_id, user_name, type, scheduled_on, channel_id)
+                VALUES ($1, $2, $3, $4, $5)
                 ON CONFLICT (user_id, type) DO UPDATE
                 SET user_name = EXCLUDED.user_name,
                     scheduled_on = EXCLUDED.scheduled_on,
+                    channel_id = EXCLUDED.channel_id,
                     updated_at = CURRENT_TIMESTAMP
                 """,
                 user_id,
                 user_name,
                 type_,
                 scheduled_on,
+                channel_id,
             )
         pretty_log(
             tag="db",
-            message=f"Upserted schedule for user {user_name}, type {type_}",
+            message=f"Upserted schedule for user {user_name}, type {type_}, channel {channel_id}",
             bot=bot,
         )
     except Exception as e:
@@ -163,6 +165,7 @@ async def upsert_user_schedule(
             message=f"Failed to upsert schedule for user {user_name}, type {type_}: {e}",
             bot=bot,
         )
+
 
 # ────────────────────────────────────────────
 #   🐱 Delete User Schedule Row by Type
@@ -218,20 +221,17 @@ async def delete_reminder(bot, reminder_id: int):
 # ────────────────────────────────────────────
 #   🐱 Fetch Reminders Due for Processing
 # ────────────────────────────────────────────
-async def fetch_due_reminders(bot, current_timestamp: int) -> List[dict]:
-    """
-    Fetch all reminders that are due (scheduled_on <= current_timestamp).
-    """
+async def fetch_due_reminders(bot) -> List[dict]:
+    """Fetch reminders that are due now or earlier and still pending."""
     try:
         async with bot.pg_pool.acquire() as conn:
             rows = await conn.fetch(
                 """
-                SELECT reminder_id, user_id, user_name, type, scheduled_on
+                SELECT reminder_id, user_id, user_name, type, scheduled_on, channel_id
                 FROM pokemeow_reminders_schedule
-                WHERE scheduled_on <= $1
-                ORDER BY scheduled_on ASC
-                """,
-                current_timestamp,
+                WHERE scheduled_on <= EXTRACT(EPOCH FROM NOW())::BIGINT
+                ORDER BY scheduled_on ASC;
+                """
             )
             return [dict(row) for row in rows]
     except Exception as e:

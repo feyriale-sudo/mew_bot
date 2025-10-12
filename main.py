@@ -73,10 +73,10 @@ ASIA_SINGAPORE = ZoneInfo("Asia/Singapore")
 MEW_MORNING_STATUSES = [
     (discord.ActivityType.playing, "with Skaia's hair ˚₊⊹♡"),
     (discord.ActivityType.playing, "with Skaia's morning coffee ₊˚☕︵♡"),
-    (discord.ActivityType.playing, "with Skaia’s Mew shopping list ⋆｡˚🛒♡"),
+    (discord.ActivityType.playing, "with Skaia's Mew shopping list ⋆｡˚🛒♡"),
     (discord.ActivityType.playing, "with pink reminders for Skaia ୨୧₊˚♡"),
-    (discord.ActivityType.listening, "to Skaia’s soft alarm chimes ⋆｡˚🔔⊹♡"),
-    (discord.ActivityType.watching, "over Skaia’s busy timers ˚₊· ͟͟͞͞➳♡"),
+    (discord.ActivityType.listening, "to Skaia's soft alarm chimes ⋆｡˚🔔⊹♡"),
+    (discord.ActivityType.watching, "over Skaia's busy timers ˚₊· ͟͟͞͞➳♡"),
     (discord.ActivityType.playing, "with reminders as bright as Skaia ˚ʚ♡ɞ˚"),
 ]
 
@@ -84,14 +84,14 @@ MEW_NIGHT_STATUSES = [
     (discord.ActivityType.playing, "with starlit reminders for Skaia ⋆˙⟡♡"),
     (discord.ActivityType.playing, "with pink dreams in the market ｡˚୨୧˚｡"),
     (discord.ActivityType.playing, "with quiet timers as Skaia rests ₊˚✧ ﾟ."),
-    (discord.ActivityType.listening, "Skaia’s sleepy reminders ₊˚.⋆𐙚₊˚⊹♡"),
-    (discord.ActivityType.watching, "over Skaia’s night market alerts ｡ﾟ•┈୨♡୧┈•ﾟ｡"),
+    (discord.ActivityType.listening, "Skaia's sleepy reminders ₊˚.⋆𐙚₊˚⊹♡"),
+    (discord.ActivityType.watching, "over Skaia's night market alerts ｡ﾟ•┈୨♡୧┈•ﾟ｡"),
     (discord.ActivityType.playing, "with starry timers and pink wishes ⊹₊ ⊹⋆˚｡𖦹"),
 ]
 
 MEW_DEFAULT_STATUSES = [
     (discord.ActivityType.watching, "everyday alerts for Skaia ｡･:*:･ﾟ★,｡･:*:･ﾟ☆"),
-    (discord.ActivityType.listening, "Skaia’s reminder bells ♡₊˚︶꒷🎀꒷︶˚₊♡"),
+    (discord.ActivityType.listening, "Skaia's reminder bells ♡₊˚︶꒷🎀꒷︶˚₊♡"),
     (discord.ActivityType.watching, "Skaia shop for Mews at the market 𓆩♡𓆪"),
     (discord.ActivityType.listening, "whispers of the market ₊˚⊹♡₊˚⊹"),
 ]
@@ -114,6 +114,9 @@ async def refresh_all_caches():
         return
 
     await load_all_caches(bot)
+
+
+
 
 
 # ❀───────────────────────────────❀
@@ -140,9 +143,26 @@ async def startup_tasks():
     # ❀ Load caches ❀
     await load_all_caches(bot)
 
+    # ❀ Sync market cache to DB once on startup ❀
+    from utils.cache.cache_list import market_value_cache
+    from utils.db.market_value_db_func import sync_market_cache_to_db
+
+    if market_value_cache:
+        await sync_market_cache_to_db(bot, market_value_cache)
+        pretty_log(
+            tag="sync",
+            message=f"Market cache synced ON STARTUP: {len(market_value_cache)} entries",
+        )
+    else:
+        pretty_log(
+            tag="sync",
+            message="Market cache empty on startup, skipping sync",
+        )
+
     # ❀ Start cache refresher if not running ❀
     if not refresh_all_caches.is_running():
         refresh_all_caches.start()
+
 
     # ❀ Start status rotator if not running ❀
     if not status_rotator.is_running():
@@ -165,16 +185,25 @@ async def startup_tasks():
 async def startup_checklist(bot: commands.Bot):
     from utils.cache.cache_list import (
         market_alert_cache,
+        market_value_cache,
         missing_pokemon_cache,
         timer_cache,
+        utility_cache,
+        schedule_cache,
+        user_info_cache,
+        market_value_cache,
     )
 
     # ❀ This divider stays untouched ❀
     print("\n୨୧ ⏔⏔⏔⏔⏔⏔⏔⏔⏔⏔⏔⏔♡⏔⏔⏔⏔⏔⏔⏔⏔⏔⏔⏔⏔ ୨୧")
     print(f"✅ {len(bot.cogs)} 🌷 Cogs Loaded")
     print(f"✅ {len(market_alert_cache)} 🦄 Market Alerts")
+    print(f"✅ {len(market_value_cache)} 💎 Market Values")
     print(f"✅ {len(missing_pokemon_cache)} 🐰 Missing Pokémon Alerts")
     print(f"✅ {len(timer_cache)} ⌚ Timer Settings Loaded")
+    print(f"✅ {len(schedule_cache)} 📅 Schedule Settings Loaded")
+    print(f"✅ {len(utility_cache)} 👚 Utility Settings Loaded")
+    print(f"✅ {len(user_info_cache)} 🩰 User Info Loaded")
     print(f"✅ {status_rotator.is_running()} 👒 Status Rotator Running")
     print(f"✅ {startup_tasks.is_running()} 💄  Startup Tasks Running")
     pg_status = "Ready" if hasattr(bot, "pg_pool") else "Not Ready"

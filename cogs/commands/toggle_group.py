@@ -43,7 +43,25 @@ class ToggleGroupCommand(commands.Cog):
             slash_cmd_name=slash_cmd_name,
             command_func=timer_settings_func,
         )
+    # 🎀────────────────────────────────────────────
+    #          🌸 /toggle utilities 🌸
+    # 🎀────────────────────────────────────────────
+    @toggle_group.command(
+        name="utilities",
+        description="Toggle utility settings like fish rarity display",
+    )
+    async def toggle_utilities(
+        self,
+        interaction: discord.Interaction,
+    ):
+        slash_cmd_name = "toggle utilities"
 
+        await run_command_safe(
+            bot=self.bot,
+            interaction=interaction,
+            slash_cmd_name=slash_cmd_name,
+            command_func=utility_settings_func,
+        )
 
 
 # 🎀────────────────────────────────────────────

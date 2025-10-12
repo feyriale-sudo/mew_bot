@@ -26,7 +26,7 @@ async def load_timer_cache(bot):
 
     # 🐭 Debug log
     pretty_log(
-        tag="cache",
+        tag="",
         message=f"Loaded {len(timer_cache)} users' timer settings into cache",
         label="⌚ TIMER CACHE",
         bot=bot,

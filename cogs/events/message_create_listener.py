@@ -3,12 +3,19 @@
 # ─────────────────────────────────────────────
 
 import asyncio
+import re
 
 import discord
 from discord.ext import commands
 
 from config.settings import *
 from utils.listener_func.battle_timer import battle_timer_handler
+from utils.listener_func.catchbot_listener import (
+    handle_cb_checklist_message,
+    handle_cb_command_embed,
+    handle_cb_return_message,
+    handle_cb_run_message,
+)
 from utils.listener_func.dex_listener import dex_message_handler
 from utils.listener_func.fish_timer import fish_timer_handler
 from utils.listener_func.market_alert_listener import process_market_alert_message
@@ -20,9 +27,21 @@ from utils.listener_func.rarespawn.swap_rare_spawn import swap_rarespawn_handler
 from utils.listener_func.single_trade_listener import handle_single_trade_message
 from utils.logs.pretty_log import pretty_log
 
+# 💜────────────────────────────────────────────
+#           🎯 Message Content Triggers
+# 💜────────────────────────────────────────────
 purchase_trigger = "<:checkedbox:752302633141665812> Successfully purchased"
 multi_trade_trigger = "<:checkedbox:752302633141665812> Trade complete! :handshake:"
 dex_trigger = ":dna: **Evolution line**"
+cb_return_trigger = ":robot: I have returned with some Pokemon for you!"
+cb_command_embed_trigger = (
+    ":battery: Your CatchBot is currently catching Pokemon for you!"
+)
+cb_checklist_trigger = "View your event checklist with ;e cl"
+CATCHBOT_SPENT_PATTERN = re.compile(
+    r"You spent <:[^:]+:\d+> \*\*[\d,]+ PokeCoins\*\* to run your catch bot\.",
+    re.IGNORECASE,
+)
 
 
 # 💜────────────────────────────────────────────
@@ -65,7 +84,7 @@ class MessageCreateListener(commands.Cog):
                 and not message.webhook_id
             ):
                 return
-
+            first_embed = message.embeds[0] if message.embeds else None
             # 💖────────────────────────────────────────────
             #           🛒 Purchase Processing Only
             # 💖────────────────────────────────────────────
@@ -153,11 +172,62 @@ class MessageCreateListener(commands.Cog):
                     and "into the water" in embed_description
                 ):
                     await fish_timer_handler(message)
-                # 💜────────────────────────────────────────────
-                #           ⚔️ Battle Timer Processing Only
-                # 💜────────────────────────────────────────────
+            # 💜────────────────────────────────────────────
+            #           ⚔️ Battle Timer Processing Only
+            # 💜────────────────────────────────────────────
+            if message.embeds and message.embeds[0]:
                 await battle_timer_handler(self.bot, message)
 
+            # 💜────────────────────────────────────────────
+            #           🤖 CatchBot Processing Only
+            # 💜────────────────────────────────────────────
+            if message.content:
+                # 1️⃣ CatchBot return text
+                if cb_return_trigger.lower() in message.content.lower():
+                    pretty_log(
+                        "info",
+                        f"Matched CatchBot return trigger | Message ID: {message.id} | Channel: {message.channel.name}",
+                    )
+                    await handle_cb_return_message(bot=self.bot, message=message)
+
+                # 2️⃣ CatchBot run message
+                elif CATCHBOT_SPENT_PATTERN.search(message.content):
+                    pretty_log(
+                        "info",
+                        f"Matched CatchBot spent pattern | Message ID: {message.id} | Channel: {message.channel.name}",
+                    )
+                    await handle_cb_run_message(bot=self.bot, message=message)
+
+            # 3️⃣ CatchBot embeds
+            if first_embed:
+
+                # 🔹 Check fields
+                for field in first_embed.fields:
+                    name = field.name.lower() if field.name else ""
+                    value = field.value.lower() if field.value else ""
+
+                    if (
+                        cb_command_embed_trigger.lower() in name
+                        or cb_command_embed_trigger.lower() in value
+                    ):
+                        pretty_log(
+                            "embed",
+                            f"Matched CatchBot command trigger in embed field: {field.name}",
+                        )
+                        await handle_cb_command_embed(bot=self.bot, message=message)
+                        break
+
+                # 🔹 Check footer for ;cl command
+                if first_embed.footer and first_embed.footer.text:
+                    footer_text = first_embed.footer.text.lower()
+                    if cb_checklist_trigger.lower() in footer_text:
+                        pretty_log(
+                            "embed",
+                            f"Matched CatchBot checklist trigger in embed footer: {footer_text}",
+                        )
+                        await handle_cb_checklist_message(
+                            bot=self.bot, message=message
+                        )
         except Exception as e:
             pretty_log(
                 "critical",
