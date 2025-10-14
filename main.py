@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 from utils.cache.centralized_cache import load_all_caches
 from utils.db.get_pg_pool import *
 from utils.logs.pretty_log import pretty_log, set_mew_bot
-
+from utils.background_task.scheduler import setup_scheduler
 # ❀───────────────────────────────❀
 #       💖  Suppress Logs  💖
 # ❀───────────────────────────────❀
@@ -249,7 +249,10 @@ async def setup_hook():
         except Exception as e:
             pretty_log("error", f"Failed to load {cog_name}: {e}", include_trace=True)
 
-
+    # ❀ Setup background task scheduler ❀
+    await setup_scheduler(bot)
+    bot.scheduler_manager = bot.scheduler_manager or None
+    
 # ❀───────────────────────────────❀
 #       💖  Main Async Runner 💖
 # ❀───────────────────────────────❀

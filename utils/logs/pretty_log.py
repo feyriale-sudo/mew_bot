@@ -31,6 +31,7 @@ MEW_TAGS = {
     "cache": "🍥 Cache",
     "sync": "🌼 Sync",
     "market_alert": "🦄 Market Alert",
+    "background_task": "🌙 Background Task",
 }
 
 # 🎨 ANSI color palette (soft pinks + red/yellow highlights)
@@ -43,7 +44,9 @@ COLOR_RESET = "\033[0m"
 # Critical logs to Discord channel
 CRITICAL_LOG_CHANNEL_ID = 1411294325899264091  # replace if needed
 
-
+# 🌸───────────────────────────────────────────────🌸
+#                Pretty Logger Function
+# 🌸───────────────────────────────────────────────🌸
 def pretty_log(
     tag: str,
     message: str,
