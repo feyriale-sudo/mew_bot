@@ -11,7 +11,7 @@ class Emojis:
     sched_react = "<:cbreact:1426841452826202183>"
     quest = "<a:quest:1426528728619417671>"
     catchbot = "<a:catchbot:1426528782684131410>"
-    faction = "<:faction:1426950619499069591>"
+    faction = "<a:faction:1426950619499069591>"
     fish_embed = "<a:fishembed:1426671706596184078>"
     battle_timer = "<a:battle:1426528643965911140>"
     Pokemon_Timer_React = "<:pokemon:1426529272553803786>"
