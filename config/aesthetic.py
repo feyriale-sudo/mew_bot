@@ -1,4 +1,12 @@
 class Emojis:
+    aqua = "<:aqua:1427777477832609832>"
+    magma = "<:magma:1427777441300090890>"
+    flare = "<:flare:1427777394173018163>"
+    skull = "<:skull:1427777221908500540>"
+    galactic = "<:galactic:1427777160663400469>"
+    yell = "<:yell:1427777089070825542>"
+    rocket = "<:rocket:1427777032053456976>"
+    plasma = "<:plasma:1427776984829919252>"
     beastball = "<:beastball:1427213254878433383>"
     masterball = "<:masterball:1427213235219730453>"
     diveball = "<:diveball:1427213211689549978>"

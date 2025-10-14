@@ -101,6 +101,9 @@ async def faction_hunt_alert(bot, before: discord.Message, after: discord.Messag
     if user_faction_ball_alert == "off":
         return
 
+    embed_faction_emoji = getattr(Emojis, embed_faction.lower())
+    if embed_faction_emoji:
+        display_embed_faction = f"{embed_faction_emoji} {embed_faction.title()} faction"
     display_embed_faction = f"{embed_faction.title()} faction"
 
     user_name = member.display_name if member else fishing_user.display_name if fishing_user else "Trainer"
