@@ -49,14 +49,13 @@ async def held_item_ping(message: discord.Message):
 
         if not has_held_item:
             continue
-        msg = held_item_message(pokemon_name)
+        msg = held_item_message(pokemon_name, user)
 
         if not msg:
             continue
 
         try:
-            content = f"{user.mention} {msg}"
-            await message.channel.send(content=content)
+            await message.channel.send(content=msg)
             pretty_log(
                 "sent",
                 f"Sent held item ping for {pokemon_name} to {user.display_name} in #{message.channel.name}",
@@ -71,11 +70,11 @@ async def held_item_ping(message: discord.Message):
 # ─────────────────────────────
 #  💎 Held Item Message
 # ─────────────────────────────
-def held_item_message(pokemon_name: str) -> str | None:
+def held_item_message(pokemon_name: str, user:discord.Member) -> str | None:
     """
     Generate a compact message for a Pokemon with held items.
     """
-    held_item_phrase = f"{Emojis.item_hold} This Pokémon is holding an item!"
+    held_item_phrase = f"{Emojis.item_hold} {user.mention} This Pokémon is holding an item!"
 
     items_for_pokemon = [
         item

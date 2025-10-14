@@ -8,6 +8,7 @@ from utils.db.utilities_db_func import (
     fetch_user_utility,
     set_user_utility,
     update_fish_rarity,
+    update_faction_ball_alert
 )
 from utils.essentials.safe_respond import safe_respond
 from utils.logs.pretty_log import pretty_log
@@ -40,6 +41,7 @@ async def utility_settings_func(bot: commands.Bot, interaction: discord.Interact
                 user_id=user_id,
                 user_name=user_name,
                 fish_rarity="off",
+                faction_ball_alert="off",
             )
 
             # Set defaults for local use
@@ -47,6 +49,7 @@ async def utility_settings_func(bot: commands.Bot, interaction: discord.Interact
                 "user_id": user_id,
                 "user_name": user_name,
                 "fish_rarity": "off",
+                "faction_ball_alert": "off",
             }
 
         pretty_log(
@@ -158,6 +161,69 @@ class UtilitySettingsView(discord.ui.View):
                 "⚠️ An error occurred while updating Fish Rarity.",
                 ephemeral=True,
             )
+    # 💫────────────────────────────────────
+    # [🎯 BUTTON] Faction Ball Alert (3-State Cycle)
+    # 💫────────────────────────────────────
+    @discord.ui.button(label="Faction Ball Alert: OFF", style=ButtonStyle.secondary, emoji="🎯")
+    async def faction_ball_alert_button(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
+        if interaction.user != self.user:
+            await interaction.response.send_message(
+                "You cannot interact with this button.", ephemeral=True
+            )
+            return
+
+        await interaction.response.defer()
+        try:
+            current_state = str(
+                self.utility_settings.get("faction_ball_alert", "off")
+            ).lower()
+
+            # 🔹 3-State Cycle: off → on → on_no_pings → off
+            if current_state == "off":
+                new_state = "on"
+            elif current_state == "on":
+                new_state = "on_no_pings"
+            else:  # on_no_pings or any other state
+                new_state = "off"
+
+            await update_faction_ball_alert(
+                self.bot,
+                user=self.user,
+                faction_ball_alert=new_state,
+            )
+
+            self.utility_settings["faction_ball_alert"] = new_state
+            self.update_button_styles()
+
+            display_text = {
+                "off": "OFF",
+                "on": "ON",
+                "on_no_pings": "ON (No Pings)",
+            }.get(new_state, "OFF")
+
+            await interaction.edit_original_response(
+                content=f"Modify your Timer Settings:\n🎯 Faction Ball Alert set to **{display_text}**",
+                view=self,
+            )
+
+            pretty_log(
+                tag="ui",
+                message=f"{self.user.display_name} set Faction Ball Alert to {display_text}",
+                bot=self.bot,
+            )
+
+        except Exception as e:
+            pretty_log(
+                tag="error",
+                message=f"Error toggling Faction Ball Alert: {e}",
+                bot=self.bot,
+            )
+            await interaction.followup.send(
+                "⚠️ An error occurred while updating Faction Ball Alert.",
+                ephemeral=True,
+            )
 
     # 💫────────────────────────────────────
     # [🎨 UPDATED STYLE FUNCTION]
@@ -173,3 +239,19 @@ class UtilitySettingsView(discord.ui.View):
             f"Fish Rarity: {'ON' if fish_rarity_enable else 'OFF'}"
         )
 
+        # 🎯 Faction Ball ALert (3 states)
+        faction_ball_alert_state = str(
+            self.utility_settings.get("faction_ball_alert", "off")
+        ).lower()
+        if faction_ball_alert_state == "off":
+            self.faction_ball_alert_button.style = ButtonStyle.secondary
+            self.faction_ball_alert_button.label = "Faction Ball Alert: OFF"
+        elif faction_ball_alert_state == "on":
+            self.faction_ball_alert_button.style = ButtonStyle.success
+            self.faction_ball_alert_button.label = "Faction Ball Alert: ON"
+        elif faction_ball_alert_state == "on_no_pings":
+            self.faction_ball_alert_button.style = ButtonStyle.primary
+            self.faction_ball_alert_button.label = "Faction Ball Alert: ON (No Pings)"
+        else:
+            self.faction_ball_alert_button.style = ButtonStyle.secondary
+            self.faction_ball_alert_button.label = "Faction Ball Alert: OFF"

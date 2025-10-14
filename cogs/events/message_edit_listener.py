@@ -8,6 +8,7 @@ import discord
 from discord.ext import commands
 
 from config.settings import *
+from utils.listener_func.faction_hunt_alert import faction_hunt_alert
 from utils.listener_func.fish_rarity_embed import fish_rarity_embed
 from utils.listener_func.rarespawn.catch_and_fish import (
     catch_and_fish_message_rare_spawn_handler,
@@ -15,7 +16,7 @@ from utils.listener_func.rarespawn.catch_and_fish import (
 from utils.logs.pretty_log import pretty_log
 
 RARE_SPAWN_TRIGGERS = ["You caught a", "broke out of the", "ran away"]
-
+FISHING_COLOR = 0x87CEFA
 
 class MessageEditListener(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -74,6 +75,28 @@ class MessageEditListener(commands.Cog):
                 trigger in embed_desc for trigger in RARE_SPAWN_TRIGGERS
             ):
                 await catch_and_fish_message_rare_spawn_handler(self.bot, before, after)
+            # 💜────────────────────────────────────────────
+            #           🟣 Faction Hunt Alerts
+            # 💜────────────────────────────────────────────
+            if after.embeds:
+                desc = after.embeds[0].description
+                color = after.embeds[0].color
+                if (
+                    desc
+                    and "<:team_logo:" in desc
+                    and "fished a wild" in desc
+                    and (
+                        color == FISHING_COLOR
+                        or getattr(color, "value", None) == FISHING_COLOR
+                    )
+                ):
+                    pretty_log(
+                        "info",
+                        f"Detected faction ball alert in fish embed",
+                        label="🛡️ FACTION BALL ALERT",
+                        bot=self.bot,
+                    )
+                    await faction_hunt_alert(bot=self.bot, before=before, after=after)
 
         except Exception as e:
             pretty_log(

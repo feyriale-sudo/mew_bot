@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 
 from config.aesthetic import Emojis
-from config.settings import POKEMEOW_APPLICATION_ID
+from config.settings import POKEMEOW_APPLICATION_ID, BATTLE_TIMER
 from utils.cache.cache_list import timer_cache
 from utils.logs.debug_logs import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
@@ -140,7 +140,7 @@ async def battle_timer_handler(bot: commands.Bot, message: discord.Message):
         async def notify_battle_ready():
             try:
                 debug_log("Timer started (60s)")
-                await asyncio.sleep(60)
+                await asyncio.sleep(BATTLE_TIMER)
                 enemy_id = enemy_id_holder["id"]
 
                 debug_log(f"Timer finished. Enemy ID={enemy_id}")

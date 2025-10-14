@@ -39,6 +39,18 @@ async def catch_and_fish_message_rare_spawn_handler(
         return
     spawn_type = "pokemon" if embed_color != FISHING_COLOR else "fish"
 
+    # Get Ball Used
+    ball_used = None
+    ball_emoji = None
+    ball_match = re.search(
+        r":[a-zA-Z0-9_]+:\s*([A-Za-z]+ball)", embed_description, re.IGNORECASE
+    )
+    if ball_match:
+        ball_used = ball_match.group(1)
+        ball_used = ball_used.lower()
+        ball_emoji = getattr(Emojis, ball_used)
+
+    # Determine context and extract Pokemon name
     pokemon_name = ""
     # Process rare spawn caught
     if "You caught" in embed_description:
@@ -125,6 +137,7 @@ async def catch_and_fish_message_rare_spawn_handler(
         color=embed_color,
         raw_pokemon_name=raw_pokemon_name,
         rarity_emoji=rarity_emoji,
+        ball_emoji=ball_emoji,
     )
 
     rarespawn_channel = member.guild.get_channel(Channels.rare_spawn)
@@ -148,11 +161,14 @@ def build_rare_spawn_embed(
     context: str,
     image_url: str,
     color,
+    ball_emoji: str = None,
 ):
     content = f"Attention all <@&{Roles.rare_spawn}> — {member.mention} has found a {rarity_emoji} [{pokemon_name}]({message.jump_url})!"
     footer_text = CONTEXT_MAP[context]["footer"]
     catch_status = CONTEXT_MAP[context]["emoji"]
-
+    if ball_emoji:
+        content += f" {ball_emoji}"
+        
     # Look up market value using the clean pokemon name (before adding rarity emoji)
     clean_pokemon_name = raw_pokemon_name.lower()
     value_data = market_value_cache.get(clean_pokemon_name)

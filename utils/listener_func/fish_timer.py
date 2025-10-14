@@ -6,10 +6,11 @@ import discord
 from discord.ext import commands
 
 from config.aesthetic import Emojis
-from config.settings import POKEMEOW_APPLICATION_ID
+from config.settings import POKEMEOW_APPLICATION_ID, FISH_TIMER
 from utils.cache.cache_list import timer_cache  # 💜 import your cache
 from utils.logs.pretty_log import pretty_log
 from utils.pokemeow.get_pokemeow_reply import get_pokemeow_reply_member
+
 
 # 🗂 Track scheduled "command ready" tasks to avoid duplicates
 fish_ready_tasks = {}
@@ -56,7 +57,7 @@ async def fish_timer_handler(message: discord.Message):
             #   Fish Timer Notification Task
             # 💜────────────────────────────────────────────
             try:
-                await asyncio.sleep(23)
+                await asyncio.sleep(FISH_TIMER)
 
                 if setting == "on":
                     await message.channel.send(

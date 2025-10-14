@@ -4,6 +4,7 @@
 # 💜────────────────────────────────────────────
 
 from utils.cache.cache_list import (
+    daily_faction_ball_cache,
     market_alert_cache,
     market_value_cache,
     missing_pokemon_cache,
@@ -12,6 +13,7 @@ from utils.cache.cache_list import (
     user_info_cache,
     utility_cache,
 )
+from utils.cache.daily_fa_ball_cache import load_daily_faction_ball_cache
 from utils.cache.market_alert_cache import load_market_alert_cache
 from utils.cache.missing_pokemon_cache import load_missing_pokemon_cache
 from utils.cache.schedule_cache import load_schedule_cache
@@ -52,6 +54,9 @@ async def load_all_caches(bot):
         # 🌸 Load Market Value Cache
         await load_market_cache_from_db(bot)
 
+        # 🌸 Load Daily Faction Ball Cache
+        await load_daily_faction_ball_cache(bot)
+
         # 🎀 Unified summary log
         pretty_log(
             tag="",
@@ -64,8 +69,9 @@ async def load_all_caches(bot):
                 f"Schedule Settings: {len(schedule_cache)} ~{get_deep_size(schedule_cache)//1024} KB +"
                 f"Utility Settings: {len(utility_cache)} ~{get_deep_size(utility_cache)//1024} KB + "
                 f"User Info: {len(user_info_cache)} ~{get_deep_size(user_info_cache)//1024} KB + "
+                f"Daily Faction Balls: {len(daily_faction_ball_cache)} ~{get_deep_size(daily_faction_ball_cache)//1024} KB + "
                 f"Market Values: {len(market_value_cache)} ~{get_deep_size(market_value_cache)//1024} KB = "
-                f"Total: ~{(get_deep_size(market_alert_cache) + get_deep_size(missing_pokemon_cache) + get_deep_size(timer_cache) + get_deep_size(schedule_cache) + get_deep_size(utility_cache) + get_deep_size(user_info_cache) + get_deep_size(market_value_cache))//1024} KB",
+                f"Total Approx: ~{(get_deep_size(market_alert_cache) + get_deep_size(missing_pokemon_cache) + get_deep_size(timer_cache) + get_deep_size(schedule_cache) + get_deep_size(utility_cache) + get_deep_size(user_info_cache) + get_deep_size(daily_faction_ball_cache) + get_deep_size(market_value_cache))//1024} KB"
             ),
         ),
     except Exception as e:

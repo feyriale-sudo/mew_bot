@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 
 from config.aesthetic import Emojis
-from config.settings import POKEMEOW_APPLICATION_ID
+from config.settings import POKEMEOW_APPLICATION_ID, POKEMON_TIMER
 from utils.cache.cache_list import timer_cache  # 💜 import your cache
 from utils.logs.pretty_log import pretty_log
 
@@ -68,12 +68,12 @@ async def pokemon_timer_handler(message: discord.Message):
             #   Pokemon Timer Notification Task
             # 💜────────────────────────────────────────────
             try:
-                await asyncio.sleep(11)
+                await asyncio.sleep(POKEMON_TIMER)
 
                 if setting == "on":
                     await message.channel.send(
                         f"{member.mention}, your Pokemon command is ready! {Emojis.Pink_Sparkles}"
-                    ) #TODO update with skaia's emojis
+                    )
                 elif setting == "on_no_pings":
                     await message.channel.send(
                         f"{member.display_name}, your Pokemon command is ready! {Emojis.Pink_Sparkles}"

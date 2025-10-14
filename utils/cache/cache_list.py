@@ -30,7 +30,7 @@ timer_cache = (
 # ───────────────────────────────────────────────
 utility_cache: dict[int, dict] = (
     {}
-)  # user_id -> {"user_name": str, "fish_rarity": str}
+)  # user_id -> {"user_name": str, "fish_rarity": str, "faction_ball_alert":str,}
 
 # 🌸──────────────────────────────────────────────
 #      🩰 User Info Cache (Global) 🩰
@@ -73,3 +73,19 @@ schedule_cache: dict[int, list[dict]] = {}  # user_id -> [schedules]
 #     ]
 # }
 #
+
+# 🌸──────────────────────────────────────────────
+# Daily Faction Ball Cache (Global)
+# ───────────────────────────────────────────────
+daily_faction_ball_cache: dict[str, str | None] = {}
+# Structure:
+# daily_faction_ball_cache = {
+#     "aqua": "Some Value or None",
+#     "flare": "Some Value or None",
+#     "galactic": None,
+#     "magma": "Some Value or None",
+#     "plasma": None,
+#     "rocket": "Some Value or None",
+#     "skull": None,
+#     "yell": "Some Value or None"
+# }

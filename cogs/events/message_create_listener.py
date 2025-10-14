@@ -27,7 +27,8 @@ from utils.listener_func.rarespawn.egg_hatch_rs import egg_rarespawn_handler
 from utils.listener_func.rarespawn.swap_rare_spawn import swap_rarespawn_handler
 from utils.listener_func.single_trade_listener import handle_single_trade_message
 from utils.logs.pretty_log import pretty_log
-
+from utils.listener_func.faction_ball_listener import extract_faction_ball_from_daily, extract_faction_ball_from_fa
+from utils.listener_func.faction_hunt_alert import faction_hunt_alert
 # 💜────────────────────────────────────────────
 #           🎯 Message Content Triggers
 # 💜────────────────────────────────────────────
@@ -44,6 +45,7 @@ CATCHBOT_SPENT_PATTERN = re.compile(
     re.IGNORECASE,
 )
 held_item_trigger = "<:held_item:"
+FACTIONS = ["aqua", "flare", "galactic", "magma", "plasma", "rocket", "skull", "yell"]
 
 
 # 💜────────────────────────────────────────────
@@ -190,7 +192,26 @@ class MessageCreateListener(commands.Cog):
                 and held_item_trigger in message.embeds[0].description
             ):
                 await held_item_ping(message)
-                
+            # 💜────────────────────────────────────────────
+            #           🟣 Faction Ball Processing Only
+            # 💜────────────────────────────────────────────
+            # A. From ;fa command
+            if first_embed:
+                if first_embed.author and any(f in first_embed.author.name.lower() for f in FACTIONS):
+                    await extract_faction_ball_from_fa(self.bot, message)
+
+            # B. From daily message
+            if first_embed:
+                if first_embed.description and "daily streak" in first_embed.description.lower():
+                    await extract_faction_ball_from_daily(self.bot, message)
+
+            # 💜────────────────────────────────────────────
+            #        🎈 Faction Ball Alert Processing Only
+            # 💜────────────────────────────────────────────
+            if first_embed:
+                if first_embed.description and "<:team_logo:" in first_embed.description and "found a wild" in first_embed.description:
+                    await faction_hunt_alert(self.bot, before=message, after=message)
+
             # 💜────────────────────────────────────────────
             #           🤖 CatchBot Processing Only
             # 💜────────────────────────────────────────────

@@ -155,9 +155,9 @@ def update_user_name_in_cache(user: discord.Member, user_name: str):
             message=f"Failed to update user_name in cache for {user.display_name}: {e}",
         )
 
-#--------------------
+# --------------------
 #  Delete user info from cache
-#--------------------
+# --------------------
 def delete_user_info_from_cache(user:discord.Member):
     """
     Delete a user's info from cache.
@@ -181,3 +181,5 @@ def delete_user_info_from_cache(user:discord.Member):
             tag="error",
             message=f"Failed to delete user info from cache for {user.display_name}: {e}",
         )
+
+

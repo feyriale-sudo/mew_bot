@@ -7,13 +7,14 @@ from utils.logs.pretty_log import pretty_log
 
 
 # --------------------
-#  Upsert a user utility setting
+#  Upsert a user utility setting (now supports faction_ball_alert)
 # --------------------
 async def set_user_utility(
     bot,
     user_id: int,
     user_name: str | None = None,
     fish_rarity: str | None = None,
+    faction_ball_alert: str | None = None,
 ):
     """
     Insert or update a user's utility settings.
@@ -23,15 +24,17 @@ async def set_user_utility(
         async with bot.pg_pool.acquire() as conn:
             await conn.execute(
                 """
-                INSERT INTO utilities (user_id, user_name, fish_rarity)
-                VALUES ($1, $2, $3)
+                INSERT INTO utilities (user_id, user_name, fish_rarity, faction_ball_alert)
+                VALUES ($1, $2, $3, $4)
                 ON CONFLICT (user_id) DO UPDATE SET
                     user_name = COALESCE($2, utilities.user_name),
-                    fish_rarity = COALESCE($3, utilities.fish_rarity)
+                    fish_rarity = COALESCE($3, utilities.fish_rarity),
+                    faction_ball_alert = COALESCE($4, utilities.faction_ball_alert)
                 """,
                 user_id,
                 user_name,
                 fish_rarity,
+                faction_ball_alert,
             )
 
         pretty_log(
@@ -47,6 +50,7 @@ async def set_user_utility(
             user_id,
             user_name=user_name,
             fish_rarity=fish_rarity,
+            faction_ball_alert=faction_ball_alert,
         )
 
     except Exception as e:
@@ -78,7 +82,7 @@ async def fetch_all_utilities(bot) -> list[dict]:
 
 
 # --------------------
-#  Fetch single user by ID
+#  Fetch single user by ID (now includes faction_ball_alert)
 # --------------------
 async def fetch_user_utility(bot, user_id: int) -> dict | None:
     """
@@ -97,6 +101,43 @@ async def fetch_user_utility(bot, user_id: int) -> dict | None:
             bot=bot,
         )
         return None
+
+# --------------------
+#  Update faction_ball_alert
+# --------------------
+async def update_faction_ball_alert(
+    bot, user: discord.Member, faction_ball_alert: str
+) -> bool:
+    """
+    Update a user's faction_ball_alert setting.
+    """
+    user_id = user.id
+    user_name = user.display_name
+    try:
+        async with bot.pg_pool.acquire() as conn:
+            result = await conn.execute(
+                "UPDATE utilities SET faction_ball_alert = $1 WHERE user_id = $2",
+                faction_ball_alert,
+                user_id,
+            )
+        updated = result.endswith("UPDATE 1")
+        pretty_log(
+            tag="db",
+            message=f"Updated faction_ball_alert for {user_name}: {updated}",
+            bot=bot,
+        )
+        # Update cache
+        from utils.cache.utility_cache import update_faction_ball_alert_in_cache
+
+        update_faction_ball_alert_in_cache(user, faction_ball_alert)
+        return updated
+    except Exception as e:
+        pretty_log(
+            tag="error",
+            message=f"Failed to update faction_ball_alert for {user_name}: {e}",
+            bot=bot,
+        )
+        return False
 
 
 # --------------------
