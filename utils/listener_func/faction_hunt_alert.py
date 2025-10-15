@@ -2,14 +2,18 @@ import re
 
 import discord
 
-from config.aesthetic import Emojis
+from config.aesthetic import Emojis, FACTION_LOGO_EMOJIS
 from config.faction_data import get_faction_by_emoji
-from utils.cache.cache_list import daily_faction_ball_cache, user_info_cache, utility_cache
-from utils.db.daily_faction_ball_db import fetch_all_faction_balls, update_faction_ball
-from utils.db.user_info_db_func import set_user_info, update_faction
+from utils.cache.cache_list import (
+    daily_faction_ball_cache,
+    user_info_cache,
+    utility_cache,
+)
 from utils.logs.pretty_log import pretty_log
 from utils.pokemeow.get_pokemeow_reply import get_pokemeow_reply_member
+
 FISHING_COLOR = 0x87CEFA
+
 
 # 🟣────────────────────────────────────────────
 # [🎯 FUNCTION] Faction Hunt Listener
@@ -47,8 +51,8 @@ async def faction_hunt_alert(bot, before: discord.Message, after: discord.Messag
     if not member:
         embed_color = after.embeds[0].color
         if embed_color and (
-                embed_color.value == FISHING_COLOR or embed_color == FISHING_COLOR
-            ):
+            embed_color.value == FISHING_COLOR or embed_color == FISHING_COLOR
+        ):
             if after.reference and getattr(after.reference, "resolved", None):
                 resolved_author = getattr(after.reference.resolved, "author", None)
                 trainer_id = resolved_author.id if resolved_author else None
@@ -58,9 +62,9 @@ async def faction_hunt_alert(bot, before: discord.Message, after: discord.Messag
                 if name_match:
                     trainer_name = name_match.group(1)
                     user = discord.utils.find(
-                            lambda m: m.display_name == trainer_name,
-                            after.guild.members,
-                        )
+                        lambda m: m.display_name == trainer_name,
+                        after.guild.members,
+                    )
                     fishing_trainer_id = user.id if user else None
 
             if not trainer_id and not trainer_name:
@@ -86,8 +90,11 @@ async def faction_hunt_alert(bot, before: discord.Message, after: discord.Messag
     if not user_faction_ball_alert:
         if trainer_name:
             from utils.cache.utility_cache import get_user_id_by_name
+
             user_id = get_user_id_by_name(trainer_name)
-            user_faction_ball_alert = utility_cache.get(user_id, {}).get("faction_ball_alert")
+            user_faction_ball_alert = utility_cache.get(user_id, {}).get(
+                "faction_ball_alert"
+            )
 
             if user_id:
                 fishing_user = after.guild.get_member(user_id)
@@ -101,13 +108,23 @@ async def faction_hunt_alert(bot, before: discord.Message, after: discord.Messag
     if user_faction_ball_alert == "off":
         return
 
-    embed_faction_emoji = getattr(Emojis, embed_faction.lower())
+
+    embed_faction_emoji = getattr(FACTION_LOGO_EMOJIS, embed_faction)
+    print(embed_faction)
     if embed_faction_emoji:
         display_embed_faction = f"{embed_faction_emoji} {embed_faction.title()} faction"
     display_embed_faction = f"{embed_faction.title()} faction"
 
-    user_name = member.display_name if member else fishing_user.display_name if fishing_user else "Trainer"
-    user_mention = member.mention if member else fishing_user.mention if fishing_user else "Trainer"
+    user_name = (
+        member.display_name
+        if member
+        else fishing_user.display_name if fishing_user else "Trainer"
+    )
+    user_mention = (
+        member.mention
+        if member
+        else fishing_user.mention if fishing_user else "Trainer"
+    )
 
     user_faction = user_info_cache.get(user_id, {}).get("faction")
     if not user_faction:
@@ -132,7 +149,7 @@ async def faction_hunt_alert(bot, before: discord.Message, after: discord.Messag
                 f"Sent faction ball alert to {user_name} ({user_id}) for {embed_faction} daily ball.",
             )
         elif user_faction_ball_alert == "on_no_pings":
-            content =f"{Emojis.faction} {user_name} This Pokémon is from {display_embed_faction}! Use {ball_emoji} to catch it!"
+            content = f"{Emojis.faction} {user_name} This Pokémon is from {display_embed_faction}! Use {ball_emoji} to catch it!"
             await after.channel.send(content=content)
             pretty_log(
                 "info",

@@ -13,10 +13,11 @@ import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
 
+from utils.background_task.scheduler import setup_scheduler
 from utils.cache.centralized_cache import load_all_caches
 from utils.db.get_pg_pool import *
 from utils.logs.pretty_log import pretty_log, set_mew_bot
-from utils.background_task.scheduler import setup_scheduler
+
 # ❀───────────────────────────────❀
 #       💖  Suppress Logs  💖
 # ❀───────────────────────────────❀
@@ -63,6 +64,9 @@ async def on_command_error(ctx, error):
     )
 
 
+# ❀───────────────────────────────────────────────❀
+#      💖 Timezone Configuration (Singapore) 💖
+# ❀───────────────────────────────────────────────❀
 ASIA_SINGAPORE = ZoneInfo("Asia/Singapore")
 
 
@@ -97,6 +101,9 @@ MEW_DEFAULT_STATUSES = [
 ]
 
 
+# ❀───────────────────────────────❀
+#      💖  Pick Status 💖
+# ❀───────────────────────────────❀
 def pick_status_tuple():
     now = datetime.now(ASIA_SINGAPORE)
     pool = MEW_MORNING_STATUSES if 6 <= now.hour < 18 else MEW_NIGHT_STATUSES
@@ -160,7 +167,6 @@ async def startup_tasks():
     if not refresh_all_caches.is_running():
         refresh_all_caches.start()
 
-
     # ❀ Start status rotator if not running ❀
     if not status_rotator.is_running():
         status_rotator.start()
@@ -173,6 +179,8 @@ async def startup_tasks():
         message=f"Initial presence set: {activity_type} {message}",
         label="👒 Status Rotator",
     )
+
+    # ❀ Run startup checklist ❀
     await startup_checklist(bot)
 
 
@@ -181,15 +189,14 @@ async def startup_tasks():
 # ❀───────────────────────────────❀
 async def startup_checklist(bot: commands.Bot):
     from utils.cache.cache_list import (
+        daily_faction_ball_cache,
         market_alert_cache,
         market_value_cache,
         missing_pokemon_cache,
-        timer_cache,
-        utility_cache,
         schedule_cache,
+        timer_cache,
         user_info_cache,
-        market_value_cache,
-        daily_faction_ball_cache
+        utility_cache,
     )
 
     # ❀ This divider stays untouched ❀
@@ -252,7 +259,8 @@ async def setup_hook():
     # ❀ Setup background task scheduler ❀
     await setup_scheduler(bot)
     bot.scheduler_manager = bot.scheduler_manager or None
-    
+
+
 # ❀───────────────────────────────❀
 #       💖  Main Async Runner 💖
 # ❀───────────────────────────────❀
@@ -274,5 +282,8 @@ async def main():
             retry_delay = min(retry_delay * 2, 60)
 
 
+# ❀───────────────────────────────❀
+#       💖  Entry Point 💖
+# ❀───────────────────────────────❀
 if __name__ == "__main__":
     asyncio.run(main())

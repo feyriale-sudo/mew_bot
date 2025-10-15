@@ -1,12 +1,4 @@
 class Emojis:
-    aqua = "<:aqua:1427777477832609832>"
-    magma = "<:magma:1427777441300090890>"
-    flare = "<:flare:1427777394173018163>"
-    skull = "<:skull:1427777221908500540>"
-    galactic = "<:galactic:1427777160663400469>"
-    yell = "<:yell:1427777089070825542>"
-    rocket = "<:rocket:1427777032053456976>"
-    plasma = "<:plasma:1427776984829919252>"
     beastball = "<:beastball:1427213254878433383>"
     masterball = "<:masterball:1427213235219730453>"
     diveball = "<:diveball:1427213211689549978>"
@@ -44,7 +36,16 @@ class Emojis:
     Catched = "<:catched:1425624490494267563>"
     Fled = "<:fled:1425624383166218240>"
 
-
+class FACTION_LOGO_EMOJIS:
+    aqua = "<:aqua:1427777477832609832>"
+    magma = "<:magma:1427777441300090890>"
+    flare = "<:flare:1427777394173018163>"
+    skull = "<:skull:1427777221908500540>"
+    galactic = "<:galactic:1427777160663400469>"
+    yell = "<:yell:1427777089070825542>"
+    rocket = "<:rocket:1427777032053456976>"
+    plasma = "<:plasma:1427776984829919252>"
+    
 class Thumbnails:
     Market_Mine = "https://media.discordapp.net/attachments/1424888292184424530/1425628639902302351/mewqt.png?ex=68e847a2&is=68e6f622&hm=9caa43168820147627066277af69591b87ac8ce97f117000c44acaff2b151ca3&=&format=webp&quality=lossless&width=827&height=794"
     Missing_List = "https://media.discordapp.net/attachments/1424888292184424530/1425632466349199452/image0.png?ex=68e84b32&is=68e6f9b2&hm=803be5ade05a607cd901be72ffbcd9836b100c842fa34d446d11d842a4a73100&=&format=webp&quality=lossless&width=824&height=842"
