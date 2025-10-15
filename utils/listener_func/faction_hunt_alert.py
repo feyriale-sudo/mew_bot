@@ -111,7 +111,7 @@ async def faction_hunt_alert(bot, before: discord.Message, after: discord.Messag
 
     embed_faction_emoji = getattr(FACTION_LOGO_EMOJIS, embed_faction)
 
-    display_embed_faction = f"{embed_faction_emoji} {embed_faction.title()} faction"
+    display_embed_faction = f"{embed_faction_emoji} faction"
 
     user_name = (
         member.display_name

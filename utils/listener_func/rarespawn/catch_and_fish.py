@@ -196,8 +196,9 @@ def build_rare_spawn_embed(
     content = f"Attention all <@&{Roles.rare_spawn}> — {member.mention} has found a {rarity_emoji} [{pokemon_name}]({message.jump_url})!"
     footer_text = CONTEXT_MAP[context]["footer"]
     catch_status = CONTEXT_MAP[context]["emoji"]
+    pretty_log("debug", f"Ball emoji: {ball_emoji}")
     if ball_emoji:
-        content += f" {ball_emoji}"
+        catch_status += f" {ball_emoji}"
 
     # Look up market value using the clean pokemon name (before adding rarity emoji)
     clean_pokemon_name = raw_pokemon_name.lower()
