@@ -1,6 +1,6 @@
 import re
-from datetime import datetime
 import time
+from datetime import datetime
 
 import discord
 from discord.ext import commands
@@ -8,14 +8,13 @@ from discord.ext import commands
 from config.aesthetic import Emojis
 from config.settings import POKEMEOW_APPLICATION_ID
 from utils.cache.cache_list import timer_cache, user_info_cache
-from utils.db.user_info_db_func import set_user_info
 from utils.db.schedule_db_func import (
-
     delete_user_schedule,
     fetch_user_schedule,
     update_scheduled_on,
     upsert_user_schedule,
 )
+from utils.db.user_info_db_func import set_user_info
 from utils.logs.pretty_log import pretty_log
 from utils.pokemeow.get_pokemeow_reply import get_pokemeow_reply_member
 
@@ -86,10 +85,18 @@ async def handle_quest_checklist_message(bot: commands.Bot, message: discord.Mes
         in embed.description
     ):
         # User's quest is ready, remove any existing schedule
+        # Check if there is an existing schedule
+        user_quest_schedule = await fetch_user_schedule(
+            bot=bot,
+            user_id=member.id,
+            type_="quest",
+        )
+        if not user_quest_schedule:
+            return
         await delete_user_schedule(
             bot=bot,
             user_id=member.id,
-            schedule_type="quest",
+            type_="quest",
         )
         content = f"{Emojis.quest} {member.mention}, your next quest is available!"
         await message.channel.send(content)
@@ -152,6 +159,7 @@ async def handle_quest_checklist_message(bot: commands.Bot, message: discord.Mes
     else:
         return  # No timestamp found, do nothing
 
+
 # ────────────────────────────────────────────
 #   🎀 Count Current Quests from Embed Description
 # ────────────────────────────────────────────
@@ -161,6 +169,7 @@ def count_current_quests(embed_description: str) -> int:
     Example: Each quest starts with '**Quest #N**:'
     """
     return len(re.findall(r"\*\*Quest #\d+\*\*:", embed_description))
+
 
 # ────────────────────────────────────────────
 #   🎀 Parse Footer Timer to Unix Seconds
@@ -226,7 +235,7 @@ async def handle_quest_embed(bot, message: discord.Message):
             await delete_user_schedule(
                 bot=bot,
                 user_id=member.id,
-                schedule_type="quest",
+                type_="quest",
             )
             content = f"{Emojis.quest} {member.mention}, your next quest is available!"
             await message.channel.send(content)
@@ -240,7 +249,7 @@ async def handle_quest_embed(bot, message: discord.Message):
     # Get user's patreon perk level
     user_info = user_info_cache.get(member.id)
     if not user_info:
-        #Upsert user info in db and cache if not present
+        # Upsert user info in db and cache if not present
         await set_user_info(
             bot=bot,
             user_id=member.id,
@@ -249,7 +258,9 @@ async def handle_quest_embed(bot, message: discord.Message):
         return
     patreon_tier = user_info.get("patreon_tier")
     if not patreon_tier:
-        content = f"Please tell me your Patreon rank by using the command `;perks` or `;pro`"
+        content = (
+            f"Please tell me your Patreon rank by using the command `;perks` or `;pro`"
+        )
         await message.channel.send(content)
         pretty_log(
             tag="quest",
@@ -313,6 +324,7 @@ async def handle_quest_embed(bot, message: discord.Message):
             )
             return
 
+
 # ────────────────────────────────────────────
 #   🎀 Handle Quest Complete Message
 # ────────────────────────────────────────────
@@ -340,7 +352,8 @@ async def handle_quest_complete_message(bot, message: discord.Message):
     # Get the member object from the guild
     guild = message.guild
     member = discord.utils.find(
-        lambda m: m.name == raw_username or m.display_name == raw_username, guild.members
+        lambda m: m.name == raw_username or m.display_name == raw_username,
+        guild.members,
     )
     if not member:
         return
@@ -368,7 +381,9 @@ async def handle_quest_complete_message(bot, message: discord.Message):
         return
     patreon_tier = user_info.get("patreon_tier")
     if not patreon_tier:
-        content = f"Please tell me your Patreon rank by using the command `;perks` or `;pro`"
+        content = (
+            f"Please tell me your Patreon rank by using the command `;perks` or `;pro`"
+        )
         await message.channel.send(content)
         pretty_log(
             tag="quest",
