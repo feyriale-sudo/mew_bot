@@ -187,11 +187,18 @@ async def catch_and_fish_message_rare_spawn_handler(
 
     rarespawn_channel = member.guild.get_channel(REAL_RS_CHANNEL_ID)
     if rarespawn_channel:
-        await rarespawn_channel.send(content=content, embed=embed)
-        debug_log(
-            f"Posted rare spawn of {pokemon_name} ({context}) for {member.display_name} in #{rarespawn_channel.name}",
-            highlight=True,
-        )
+        try:
+            await rarespawn_channel.send(content=content, embed=embed)
+            debug_log(
+                f"Posted rare spawn of {pokemon_name} ({context}) for {member.display_name} in #{rarespawn_channel.name}",
+                highlight=True,
+            )
+        except Exception as e:
+            pretty_log(
+                tag="error",
+                message=f"Failed to post rare spawn in channel: {e}",
+                bot=bot,
+            )
 
 
 # 💖─────────────────────────────────────────💖
