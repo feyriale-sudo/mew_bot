@@ -6,15 +6,17 @@ from config.aesthetic import Emojis
 from config.rarity import *
 from config.settings import Channels, Roles
 from utils.cache.cache_list import market_value_cache
+from utils.logs.debug_logs import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
 from utils.pokemeow.get_pokemeow_reply import get_pokemeow_reply_member
-from utils.logs.debug_logs import debug_log, enable_debug
-
 
 enable_debug(f"{__name__}.catch_and_fish_message_rare_spawn_handler")
 enable_debug(f"{__name__}.build_rare_spawn_embed")
 
+HALLOWEEN_COLOR = 0xFFA500  # orange
 
+REAL_RS_CHANNEL_ID = Channels.rare_spawn
+TEST_RS_CHANNEL_ID = 1128425613447929859
 # ❀─────────────────────────────────────────❀
 #      💖  Catch and Fish Listener
 # ❀─────────────────────────────────────────❀
@@ -34,8 +36,22 @@ async def catch_and_fish_message_rare_spawn_handler(
     embed_description = embed.description or ""
     debug_log(f"Embed color: {embed_color}, description: {embed_description!r}")
 
+    # Get Ball Used
+    ball_used = None
+    ball_emoji = None
+    ball_match = re.search(
+        r"<:([a-zA-Z0-9_]+):\d+>\s*([A-Za-z]+ball)", embed_description, re.IGNORECASE
+    )
+    if ball_match:
+        ball_used = ball_match.group(2).lower()  # "pokeball"
+        ball_emoji_name = ball_match.group(1)    # "pokeball"
+        ball_emoji = getattr(Emojis, ball_emoji_name, None)
+        debug_log(f"Ball used: {ball_used}, Ball emoji: {ball_emoji}")
+    else:
+        debug_log("No ball used found in description.")
+
     # Check if it's NOT a rare spawn color, or if it's fishing but doesn't contain rarity triggers
-    if embed_color not in RARE_SPAWN_COLORS.values() or (
+    if embed_color not in RARE_SPAWN_COLORS.values() or embed_color == HALLOWEEN_COLOR or (
         embed_color == FISHING_COLOR
         and not any(trigger in embed_description for trigger in FISHING_RARITY_TRIGGERS)
     ):
@@ -57,12 +73,12 @@ async def catch_and_fish_message_rare_spawn_handler(
     ball_used = None
     ball_emoji = None
     ball_match = re.search(
-        r":[a-zA-Z0-9_]+:\s*([A-Za-z]+ball)", embed_description, re.IGNORECASE
+        r"<:([a-zA-Z0-9_]+):\d+>\s*([A-Za-z]+ball)", embed_description, re.IGNORECASE
     )
     if ball_match:
-        ball_used = ball_match.group(1)
-        ball_used = ball_used.lower()
-        ball_emoji = getattr(Emojis, ball_used)
+        ball_used = ball_match.group(2).lower()  # "pokeball"
+        ball_emoji_name = ball_match.group(1)  # "pokeball"
+        ball_emoji = getattr(Emojis, ball_emoji_name, None)
         debug_log(f"Ball used: {ball_used}, Ball emoji: {ball_emoji}")
     else:
         debug_log("No ball used found in description.")
@@ -129,7 +145,7 @@ async def catch_and_fish_message_rare_spawn_handler(
         elif "kyogre" in pokemon_name.lower() or "suicune" in pokemon_name.lower():
             rarity = "legendary"
             debug_log("Detected legendary fish spawn.")
-
+    #
     elif spawn_type == "pokemon":
         if embed_color == rarity_meta["legendary"]["color"]:
             rarity = "legendary"
@@ -137,15 +153,15 @@ async def catch_and_fish_message_rare_spawn_handler(
         elif embed_color == rarity_meta["shiny"]["color"]:
             rarity = "shiny"
             debug_log("Detected shiny pokemon spawn.")
-        elif embed_color != rarity_meta["event_exclusive"]["color"]:
+        elif embed_color == rarity_meta["event_exclusive"]["color"] or embed_color == rarity_meta["halloween"]["color"]:
+            rarity = "event_exclusive"
+            debug_log("Detected event exclusive or halloween pokemon spawn.")
             # Extract rarity from embed footer
             if embed.footer and embed.footer.text:
                 footer_text = embed.footer.text
-                rarity_match = re.search(r"Rarity:\s*(\w+)", footer_text)
+                rarity_match = re.search(r"Rarity:\s*([A-Za-z]+)", footer_text)
                 if rarity_match:
-                    rarity = rarity_match.group(1).lower()
-                    if rarity == "super rare":
-                        rarity = "superrare"
+                    rarity = rarity_match.group(1).strip().lower().replace(" ", "")
                     debug_log(f"Extracted rarity: {rarity}")
                 else:
                     debug_log(
@@ -169,7 +185,7 @@ async def catch_and_fish_message_rare_spawn_handler(
         ball_emoji=ball_emoji,
     )
 
-    rarespawn_channel = member.guild.get_channel(Channels.rare_spawn)
+    rarespawn_channel = member.guild.get_channel(REAL_RS_CHANNEL_ID)
     if rarespawn_channel:
         await rarespawn_channel.send(content=content, embed=embed)
         debug_log(
@@ -196,9 +212,13 @@ def build_rare_spawn_embed(
     content = f"Attention all <@&{Roles.rare_spawn}> — {member.mention} has found a {rarity_emoji} [{pokemon_name}]({message.jump_url})!"
     footer_text = CONTEXT_MAP[context]["footer"]
     catch_status = CONTEXT_MAP[context]["emoji"]
+
     pretty_log("debug", f"Ball emoji: {ball_emoji}")
     if ball_emoji:
         catch_status += f" {ball_emoji}"
+    if context == "hatched":
+        content = f"Attention all <@&{Roles.rare_spawn}> — {member.mention} just hatched a {rarity_emoji} [{pokemon_name}]({message.jump_url})!"
+        catch_status = f"{Emojis.egg} {catch_status}"
 
     # Look up market value using the clean pokemon name (before adding rarity emoji)
     clean_pokemon_name = raw_pokemon_name.lower()

@@ -29,6 +29,10 @@ from utils.listener_func.single_trade_listener import handle_single_trade_messag
 from utils.logs.pretty_log import pretty_log
 from utils.listener_func.faction_ball_listener import extract_faction_ball_from_daily, extract_faction_ball_from_fa
 from utils.listener_func.faction_hunt_alert import faction_hunt_alert
+from utils.listener_func.quest_listener import handle_quest_checklist_message, handle_quest_complete_message, handle_quest_embed
+from utils.listener_func.patreon_rank_listener import extract_patreon_rank_from_perks_embed, extract_patreon_rank_from_pro_embed
+from utils.listener_func.special_battle_listener import special_battle_npc_listener
+from utils.listener_func.spooky_hour_listener import handle_spooky_hour_hw_embed
 # 💜────────────────────────────────────────────
 #           🎯 Message Content Triggers
 # 💜────────────────────────────────────────────
@@ -46,7 +50,7 @@ CATCHBOT_SPENT_PATTERN = re.compile(
 )
 held_item_trigger = "<:held_item:"
 FACTIONS = ["aqua", "flare", "galactic", "magma", "plasma", "rocket", "skull", "yell"]
-
+hw_embed_trigger = "happy halloween pokemeow! participate in activities for rewards!"
 
 # 💜────────────────────────────────────────────
 #           🧩 Message Create Listener Cog
@@ -213,6 +217,53 @@ class MessageCreateListener(commands.Cog):
                     await faction_hunt_alert(self.bot, before=message, after=message)
 
             # 💜────────────────────────────────────────────
+            #        ⏰ Special Battle NPC Timer Processing Only
+            # 💜────────────────────────────────────────────
+            if first_embed:
+                if (
+                    first_embed.description
+                    and "challenged <:irida:1428149067673767996> **Irida** to a battle!"
+                    in first_embed.description
+                ):
+                    await special_battle_npc_listener(self.bot, message)
+
+            # 💜────────────────────────────────────────────
+            #        🎃 Spooky Hour HW Embed Processing Only
+            # 💜────────────────────────────────────────────
+            if first_embed:
+                embed_author_text = first_embed.author.name if first_embed.author else ""
+                if hw_embed_trigger in embed_author_text.lower():
+                    await handle_spooky_hour_hw_embed(self.bot, message)
+            # 💜────────────────────────────────────────────
+            #        🏆 Quest Embed Processing Only
+            # 💜────────────────────────────────────────────
+            if first_embed:
+                title = first_embed.title or ""
+                if title and "Complete your quests for rewards!" in title:
+                    await handle_quest_embed(self.bot, message)
+
+            # 💜────────────────────────────────────────────
+            #        📝 Quest Complete Processing Only
+            # 💜────────────────────────────────────────────
+            if message.content and ":notepad_spiral" in message.content and "completed the quest" in message.content:
+                await handle_quest_complete_message(self.bot, message)
+
+            # 💜────────────────────────────────────────────
+            #        💎 Patreon Rank Processing Only
+            # 💜────────────────────────────────────────────
+            if first_embed:
+                author_text = first_embed.author.name if first_embed.author else ""
+                footer_text = first_embed.footer.text if first_embed.footer else ""
+
+                # A. Perks Embed
+                if author_text and "perks" in author_text:
+                    await extract_patreon_rank_from_perks_embed(self.bot, message)
+
+                # B. Pro Embed
+                if footer_text and "to view badge information" in footer_text.lower():
+                    await extract_patreon_rank_from_pro_embed(self.bot, message)
+
+            # 💜────────────────────────────────────────────
             #           🤖 CatchBot Processing Only
             # 💜────────────────────────────────────────────
             if message.content:
@@ -257,9 +308,10 @@ class MessageCreateListener(commands.Cog):
                     if cb_checklist_trigger.lower() in footer_text:
                         pretty_log(
                             "embed",
-                            f"Matched CatchBot checklist trigger in embed footer: {footer_text}",
+                            f"Matched CatchBot and quest checklist trigger in embed footer: {footer_text}",
                         )
                         await handle_cb_checklist_message(bot=self.bot, message=message)
+                        await handle_quest_checklist_message(bot=self.bot, message=message)
         except Exception as e:
             pretty_log(
                 "critical",

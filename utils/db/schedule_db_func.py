@@ -1,5 +1,6 @@
-from typing import List, Optional
 from datetime import datetime, timedelta
+from typing import List, Optional
+
 from utils.logs.pretty_log import pretty_log
 
 
@@ -25,6 +26,9 @@ async def fetch_all_schedules(bot) -> list[dict]:
 #   🐱 Fetch Single User Schedule Row by Type
 # ────────────────────────────────────────────
 async def fetch_user_schedule(bot, user_id: int, type_: str) -> Optional[dict]:
+    """
+    Fetch a single user's schedule row by type.
+    """
     try:
         async with bot.pg_pool.acquire() as conn:
             row = await conn.fetchrow(
@@ -241,3 +245,42 @@ async def fetch_due_reminders(bot) -> List[dict]:
             bot=bot,
         )
         return []
+
+# ────────────────────────────────────────────
+#   🐱 Update Scheduled On Timestamp
+# ────────────────────────────────────────────
+async def update_scheduled_on(
+    bot,
+    user_id: int,
+    type_: str,
+    new_scheduled_on: int,
+):
+    """
+    Update the scheduled_on timestamp for a user's reminder schedule by user_id and type.
+    """
+    try:
+        async with bot.pg_pool.acquire() as conn:
+            await conn.execute(
+                """
+                UPDATE pokemeow_reminders_schedule
+                SET scheduled_on = $1,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = $2 AND type = $3
+                """,
+                new_scheduled_on,
+                user_id,
+                type_,
+            )
+        pretty_log(
+            tag="db",
+            message=f"Updated scheduled_on for user {user_id}, type {type_} to {new_scheduled_on}",
+            bot=bot,
+        )
+        return True
+    except Exception as e:
+        pretty_log(
+            tag="error",
+            message=f"Failed to update scheduled_on for user {user_id}, type {type_}: {e}",
+            bot=bot,
+        )
+        return False

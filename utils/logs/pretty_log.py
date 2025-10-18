@@ -17,7 +17,7 @@ def set_mew_bot(bot: commands.Bot):
 # 🎀 Pink aesthetic tags (warn/critical keep non-pink)
 MEW_TAGS = {
     "info": "🌸 Info",
-    "db": "🍡 DB",
+    "db": "🍡 Database",
     "cmd": "💖 Cmd",
     "ready": "🌷 Ready",
     "success": "🧁 Success",
@@ -32,6 +32,8 @@ MEW_TAGS = {
     "sync": "🌼 Sync",
     "market_alert": "🦄 Market Alert",
     "background_task": "🌙 Background Task",
+    "quest": "🎀 Quest",
+    "ui": "👚 View",
 }
 
 # 🎨 ANSI color palette (soft pinks + red/yellow highlights)

@@ -6,7 +6,8 @@ from discord.ext import commands
 from utils.background_task.user_reminders_checker import process_due_reminders
 from utils.background_task.pokemeow_schedule_checker import pokemeow_schedule_checker
 from utils.logs.pretty_log import pretty_log
-
+from utils.background_task.special_battle_timer_checker import special_battle_timer_checker
+from utils.background_task.spooky_hour_checker import check_and_handle_spooky_hour_expiry
 
 # 🍰──────────────────────────────
 #   🎀 Cog: CentralLoop
@@ -51,6 +52,12 @@ class CentralLoop(commands.Cog):
                 # 🐱 Check if any Pokemeow schedule reminder is due
                 await pokemeow_schedule_checker(self.bot)
 
+                # 🌹 Check for due special battle timers
+                await special_battle_timer_checker(self.bot)
+
+                # 🍑 Check and handle Spooky Hour expiry
+                await check_and_handle_spooky_hour_expiry(self.bot)
+
             except Exception as e:
                 pretty_log(
                     "error",
@@ -78,5 +85,7 @@ async def setup(bot: commands.Bot):
     print("  ─────────────────────────────────────────────")
     print("  ✅ 🧭  process_due_reminders")
     print("  ✅ 🐱  pokemeow_schedule_checker")
+    print("  ✅ 🌹  special_battle_timer_checker")
+    print("  ✅ 🍑  check_and_handle_spooky_hour_expiry")
     print("  🍭 CentralLoop ticking every 60 seconds!")
     print("  ─────────────────────────────────────────────\n")

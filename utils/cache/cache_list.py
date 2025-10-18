@@ -22,7 +22,7 @@ market_value_cache: dict[str, dict] = {}
 # ───────────────────────────────────────────────
 timer_cache = (
     {}
-)  # user_id -> {"pokemon_setting": str, "fish_setting": str, "battle_setting": str}
+)  # user_id -> {"pokemon_setting": str, "fish_setting": str, "battle_setting": str, "catchbot_setting":str, "quest_setting": str,}
 
 
 # 🌸──────────────────────────────────────────────
@@ -37,7 +37,7 @@ utility_cache: dict[int, dict] = (
 # ───────────────────────────────────────────────
 user_info_cache: dict[int, dict] = (
     {}
-)  # user_id -> {"user_name": str, "faction": str, "patreon_tier": str}
+)  # user_id -> {"user_name": str, "faction": str, "patreon_tier": str, "max_quests": int, "current_quest_num": int}
 
 
 # 🌸──────────────────────────────────────────────

@@ -33,7 +33,8 @@ RARE_EGG_EXCLUSIVES = [
     "nickit",
 ]
 SUPER_RARE_EGG_EXCLUSIVE = ["carbink", "mimikyu"]
-
+REAL_RS_CHANNEL_ID = Channels.rare_spawn
+TEST_RS_CHANNEL_ID = 1128425613447929859
 
 # ❀─────────────────────────────────────────❀
 #      💖  Egg Hatch Listener
@@ -92,7 +93,7 @@ async def egg_rarespawn_handler(bot, message: discord.Message):
 
     rarity_emoji = rarity_meta.get(rarity, {}).get("emoji", "")
     display_pokemon_name = pokemon_name.title()
-    context = "caught"  # Using "caught" context for egg hatches
+    context = "hatched"
 
     content, embed = build_rare_spawn_embed(
         message=message,
@@ -105,7 +106,7 @@ async def egg_rarespawn_handler(bot, message: discord.Message):
         rarity_emoji=rarity_emoji
     )
 
-    rarespawn_channel = bot.get_channel(Channels.rare_spawn)  # Use bot.get_channel
+    rarespawn_channel = bot.get_channel(REAL_RS_CHANNEL_ID)  # Use bot.get_channel
     if rarespawn_channel:
         await rarespawn_channel.send(content=content, embed=embed)
         pretty_log(

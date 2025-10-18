@@ -14,7 +14,7 @@ from utils.listener_func.rarespawn.catch_and_fish import (
     catch_and_fish_message_rare_spawn_handler,
 )
 from utils.logs.pretty_log import pretty_log
-
+from utils.listener_func.quest_listener import handle_quest_complete_message
 RARE_SPAWN_TRIGGERS = ["You caught a", "broke out of the", "ran away"]
 FISHING_COLOR = 0x87CEFA
 
@@ -97,7 +97,15 @@ class MessageEditListener(commands.Cog):
                         bot=self.bot,
                     )
                     await faction_hunt_alert(bot=self.bot, before=before, after=after)
-
+            # 💜────────────────────────────────────────────
+            #        📝 Quest Complete Processing Only
+            # 💜────────────────────────────────────────────
+            if (
+                after.content
+                and ":notepad_spiral" in after.content
+                and "completed the quest" in after.content
+            ):
+                await handle_quest_complete_message(self.bot, after)
         except Exception as e:
             pretty_log(
                 tag="critical",

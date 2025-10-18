@@ -39,12 +39,14 @@ rarity_meta = {
     "default": {"color": 0xA0D8F0},
     "event_exclusive": {"color": 15345163},
     "gigantamax": {"color": 10685254},
+    "halloween": {"color": 16753920},
 }
 
 FOOTER_TEXT = {
     "caught": "Congratulations! Keep it up ✨",
     "broke_out": "Aww! Better luck next time 🩷",
     "ran_away": "Oh, no! It got away from you 💨",
+    "hatched": "Congratulations! Keep it up ✨",
 }
 RARE_SPAWN_COLORS = {
     "legendary": rarity_meta["legendary"]["color"],
@@ -65,5 +67,8 @@ CONTEXT_MAP = {
         "footer": FOOTER_TEXT["ran_away"],
         "emoji": Emojis.Fled,
     },
+    "hatched": {
+        "footer": FOOTER_TEXT["hatched"],
+        "emoji": Emojis.Catched,
+    },
 }
-

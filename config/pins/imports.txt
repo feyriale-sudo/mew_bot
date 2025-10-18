@@ -4,6 +4,8 @@ from utils.visuals.pretty_defer import pretty_defer, pretty_error
 from utils.visuals.design_embed import design_embed
 from utils.parsers.number_parser import parse_compact_number
 
+from utils.pokemeow.get_pokemeow_reply import get_pokemeow_reply_member
+
 
 # ❀─────────────────────────────────────────❀
 #      💖  Get Pokemeow Reply

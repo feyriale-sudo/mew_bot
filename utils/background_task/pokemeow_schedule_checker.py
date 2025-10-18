@@ -1,17 +1,14 @@
-import re
 from datetime import datetime
 
 import discord
 
 from config.aesthetic import *
-from utils.db.schedule_db_func import (
-    delete_reminder,
-    fetch_all_schedules,
-    fetch_due_reminders,
-    fetch_user_schedule,
-)
+from utils.db.schedule_db_func import delete_reminder, fetch_due_reminders
 from utils.logs.pretty_log import pretty_log
 
+# ────────────────────────────────────────────
+#   🐱 Schedule Type Map
+# ────────────────────────────────────────────
 SCHEDULE_MAP = {
     "catchbot": {
         "emoji": Emojis.catchbot,
@@ -68,7 +65,9 @@ async def pokemeow_schedule_checker(bot: discord.Client):
             if type_ == "catchbot":
                 content = f"{display_emoji} {user.mention}, Your Catchbot has returned!"
             elif type_ == "quest":
-                content = f"{display_emoji} {user.mention}, Your next quest is ready!"
+                content = (
+                    f"{display_emoji} {user.mention}, Your next quest is available!"
+                )
 
             await channel.send(content=content)
             # delete reminder
@@ -83,9 +82,13 @@ async def pokemeow_schedule_checker(bot: discord.Client):
                 display_emoji = SCHEDULE_MAP.get(type_, {}).get("emoji", "")
                 content = ""
                 if type_ == "catchbot":
-                    content = f"{display_emoji} {user.mention}, Your Catchbot has returned!"
+                    content = (
+                        f"{display_emoji} {user.mention}, Your Catchbot has returned!"
+                    )
                 elif type_ == "quest":
-                    content = f"{display_emoji} {user.mention}, Your next quest is ready!"
+                    content = (
+                        f"{display_emoji} {user.mention}, Your next quest is ready!"
+                    )
 
                 await user.send(content=content)
                 # delete reminder

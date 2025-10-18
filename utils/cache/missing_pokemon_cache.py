@@ -3,9 +3,10 @@
 # ─────────────────────────────────────────────
 
 import sys
-from utils.logs.pretty_log import pretty_log
+
+from utils.cache.cache_list import _missing_pokemon_index, missing_pokemon_cache
 from utils.db.missing_pokemon_db_func import fetch_all_missing
-from utils.cache.cache_list import missing_pokemon_cache, _missing_pokemon_index
+from utils.logs.pretty_log import pretty_log
 
 
 # ❀─────────────────────────────────────────❀
@@ -32,7 +33,7 @@ async def load_missing_pokemon_cache(bot):
         _missing_pokemon_index[key] = entry
 
     pretty_log(
-        tag="💜 CACHE",
+        tag="missing",
         label="MISSING POKÉMON",
         message=f"Loaded {len(missing_pokemon_cache)} missing Pokémon into cache",
     )
@@ -57,18 +58,19 @@ def is_pokemon_in_user_cache(user_id: int, pokemon_name: str) -> bool:
             and entry.get("pokemon_name", "").lower() == target
         ):
             pretty_log(
-                tag="💜 CACHE",
+                tag="missing",
                 label="POKÉMON CHECKER",
                 message=f"Found '{pokemon_name}' in cache for user_id={user_id} 💖",
             )
             return True
 
     pretty_log(
-        tag="💜 CACHE",
+        tag="missing",
         label="POKÉMON CHECKER",
         message=f"'{pokemon_name}' not found in cache for user_id={user_id} 💧",
     )
     return False
+
 
 # ❀─────────────────────────────────────────❀
 #      💖 Find Pokemon in (User Cache)
@@ -85,13 +87,13 @@ def find_pokemon_in_user_cache(user_id: int, pokemon_name: str) -> list[dict]:
         if e.get("user_id") == user_id and e.get("pokemon_name", "").lower() == target
     ]
 
-
     pretty_log(
-        tag="💜 CACHE",
-        label="POKÉMON CHECKER",
+        tag="missing",
         message=f"Found {len(matches)} entries for '{pokemon_name}' (user_id={user_id}) 🌸",
     )
     return matches
+
+
 # ❀─────────────────────────────────────────❀
 #      💖 Find Pokémon in (User Cache, Single)
 # ❀─────────────────────────────────────────❀
@@ -108,14 +110,14 @@ def find_pokemon_in_user_cache_single(user_id: int, pokemon_name: str) -> dict |
             and entry.get("pokemon_name", "").lower() == target
         ):
             pretty_log(
-                tag="💜 CACHE",
+                tag="missing",
                 label="POKÉMON CHECKER",
                 message=f"Found '{pokemon_name}' in cache for user_id={user_id} 🌸",
             )
             return entry
 
     pretty_log(
-        tag="💜 CACHE",
+        tag="missing",
         label="POKÉMON CHECKER",
         message=f"No match for '{pokemon_name}' in cache for user_id={user_id} 💧",
     )
@@ -165,7 +167,7 @@ def insert_missing(entry: dict):
                 missing_pokemon_cache[i] = existing
                 break
         pretty_log(
-            tag="💜 CACHE",
+            tag="missing",
             label="MISSING POKÉMON",
             message=f"Updated missing Pokémon for {entry['user_name']} (Dex {entry['dex']})",
         )
@@ -173,7 +175,7 @@ def insert_missing(entry: dict):
         missing_pokemon_cache.append(entry)
         _missing_pokemon_index[key] = entry
         pretty_log(
-            tag="💜 CACHE",
+            tag="missing",
             label="MISSING POKÉMON",
             message=f"Inserted missing Pokémon for {entry['user_name']} (Dex {entry['dex']})",
         )
@@ -193,7 +195,7 @@ def remove_all_missing_for_user_cache(user_id: int):
         _missing_pokemon_index.pop(key, None)
 
     pretty_log(
-        tag="💜 CACHE",
+        tag="missing",
         message=f"Removed all missing Pokémon from cache for user_id={user_id}",
     )
 
@@ -221,7 +223,7 @@ def remove_missing(user_id: int, dex: int):
         if removed_any
         else f"No missing Pokémon found to remove (Dex {dex}) for user {user_id}"
     )
-    pretty_log(tag="💜 CACHE", label="MISSING POKÉMON", message=msg)
+    pretty_log(tag="missing", label="MISSING POKÉMON", message=msg)
 
 
 # ❀─────────────────────────────────────────❀
