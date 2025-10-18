@@ -179,6 +179,7 @@ class HELD_ITEM_POKEMON:
         "sandshrew",
         "sandslash",
         "trapinch",
+        "stunfisk"
     ]
 
     spelltag = [
