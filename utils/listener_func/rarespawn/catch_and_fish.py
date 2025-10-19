@@ -10,8 +10,8 @@ from utils.logs.debug_logs import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
 from utils.pokemeow.get_pokemeow_reply import get_pokemeow_reply_member
 
-enable_debug(f"{__name__}.catch_and_fish_message_rare_spawn_handler")
-enable_debug(f"{__name__}.build_rare_spawn_embed")
+#enable_debug(f"{__name__}.catch_and_fish_message_rare_spawn_handler")
+#enable_debug(f"{__name__}.build_rare_spawn_embed")
 
 HALLOWEEN_COLOR = 0xFFA500  # orange
 
