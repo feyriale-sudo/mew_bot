@@ -11,7 +11,7 @@ from utils.logs.pretty_log import pretty_log
 from utils.pokemeow.get_pokemeow_reply import get_pokemeow_reply_member
 
 #enable_debug(f"{__name__}.catch_and_fish_message_rare_spawn_handler")
-#enable_debug(f"{__name__}.build_rare_spawn_embed")
+# enable_debug(f"{__name__}.build_rare_spawn_embed")
 
 HALLOWEEN_COLOR = 0xFFA500  # orange
 
@@ -51,15 +51,22 @@ async def catch_and_fish_message_rare_spawn_handler(
         debug_log("No ball used found in description.")
 
     # Check if it's NOT a rare spawn color, or if it's fishing but doesn't contain rarity triggers
-    if embed_color not in RARE_SPAWN_COLORS.values() or embed_color == HALLOWEEN_COLOR or (
-        embed_color == FISHING_COLOR
-        and not any(trigger in embed_description for trigger in FISHING_RARITY_TRIGGERS)
+    if (
+        embed_color not in RARE_SPAWN_COLORS.values()
+        or embed_color == HALLOWEEN_COLOR
+        or (
+            embed_color == FISHING_COLOR
+            and not any(
+                trigger.lower() in embed_description.lower()
+                for trigger in FISHING_RARITY_TRIGGERS
+            )
+        )
     ):
         debug_log(
             "Embed color not in rare spawn colors or missing fishing rarity triggers.",
             highlight=True,
         )
-        return
+        return  # <--- Only return here!
 
     # Get Member
     member = await get_pokemeow_reply_member(before)
@@ -134,6 +141,10 @@ async def catch_and_fish_message_rare_spawn_handler(
     rarity_emoji = ""
     display_pokemon_name = None
     if spawn_type == "fish":
+        pretty_log(
+            tag="debug",
+            message="Processing fish rare spawn for rarity detection.",
+        )
         if "shiny" in pokemon_name.lower():
             rarity = "shiny"
             pokemon_name = pokemon_name.replace("Shiny ", "")  # Clean for display
@@ -145,6 +156,10 @@ async def catch_and_fish_message_rare_spawn_handler(
         elif "kyogre" in pokemon_name.lower() or "suicune" in pokemon_name.lower():
             rarity = "legendary"
             debug_log("Detected legendary fish spawn.")
+        pretty_log(
+            tag="debug",
+            message=f"Fish spawn rarity determined: {rarity}",
+        )
     #
     elif spawn_type == "pokemon":
         if embed_color == rarity_meta["legendary"]["color"]:
