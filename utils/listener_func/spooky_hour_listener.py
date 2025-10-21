@@ -8,7 +8,7 @@ from utils.db.spooky_hour_db import (
     upsert_spooky_hour,
 )
 from utils.logs.pretty_log import pretty_log
-
+from config.settings import MAIN_SERVER_ID
 BUMP_CHANNEL_ID = 1370878801277358080
 SPOOKY_HOUR_ROLE_ID = 1330644911946465362
 
@@ -43,8 +43,9 @@ async def handle_spooky_hour_hw_embed(bot: discord.Client, message: discord.Mess
     embed = message.embeds[0]
     if not embed.description:
         return
-    event_tracker_channel = message.guild.get_channel(BUMP_CHANNEL_ID)
-    spooky_hour_role = message.guild.get_role(SPOOKY_HOUR_ROLE_ID)
+    main_guild = bot.get_guild(MAIN_SERVER_ID)
+    event_tracker_channel = main_guild.get_channel(BUMP_CHANNEL_ID)
+    spooky_hour_role = main_guild.get_role(SPOOKY_HOUR_ROLE_ID)
     if "[INACTIVE]" not in embed.description:
         ends_on = extract_spooky_hour_ts(embed.description)
         if ends_on:
