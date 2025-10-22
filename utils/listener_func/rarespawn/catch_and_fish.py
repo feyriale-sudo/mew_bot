@@ -10,13 +10,15 @@ from utils.logs.debug_logs import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
 from utils.pokemeow.get_pokemeow_reply import get_pokemeow_reply_member
 
-#enable_debug(f"{__name__}.catch_and_fish_message_rare_spawn_handler")
+# enable_debug(f"{__name__}.catch_and_fish_message_rare_spawn_handler")
 # enable_debug(f"{__name__}.build_rare_spawn_embed")
 
 HALLOWEEN_COLOR = 0xFFA500  # orange
 
 REAL_RS_CHANNEL_ID = Channels.rare_spawn
 TEST_RS_CHANNEL_ID = 1128425613447929859
+
+
 # ❀─────────────────────────────────────────❀
 #      💖  Catch and Fish Listener
 # ❀─────────────────────────────────────────❀
@@ -44,7 +46,7 @@ async def catch_and_fish_message_rare_spawn_handler(
     )
     if ball_match:
         ball_used = ball_match.group(2).lower()  # "pokeball"
-        ball_emoji_name = ball_match.group(1)    # "pokeball"
+        ball_emoji_name = ball_match.group(1)  # "pokeball"
         ball_emoji = getattr(Emojis, ball_emoji_name, None)
         debug_log(f"Ball used: {ball_used}, Ball emoji: {ball_emoji}")
     else:
@@ -168,7 +170,10 @@ async def catch_and_fish_message_rare_spawn_handler(
         elif embed_color == rarity_meta["shiny"]["color"]:
             rarity = "shiny"
             debug_log("Detected shiny pokemon spawn.")
-        elif embed_color == rarity_meta["event_exclusive"]["color"] or embed_color == rarity_meta["halloween"]["color"]:
+        elif (
+            embed_color == rarity_meta["event_exclusive"]["color"]
+            or embed_color == rarity_meta["halloween"]["color"]
+        ):
             rarity = "event_exclusive"
             debug_log("Detected event exclusive or halloween pokemon spawn.")
             # Extract rarity from embed footer
@@ -237,7 +242,7 @@ def build_rare_spawn_embed(
 
     pretty_log("debug", f"Ball emoji: {ball_emoji}")
     if ball_emoji:
-        catch_status += f" {ball_emoji}"
+        catch_status = f"{ball_emoji}{CONTEXT_MAP[context]["emoji"]}"
     if context == "hatched":
         content = f"Attention all <@&{Roles.rare_spawn}> — {member.mention} just hatched a {rarity_emoji} [{pokemon_name}]({message.jump_url})!"
         catch_status = f"{Emojis.egg} {catch_status}"

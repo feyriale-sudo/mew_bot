@@ -1,14 +1,26 @@
 import discord
 
+from config.aesthetic import Emojis
 from utils.db.special_battle_timer_db import (
     fetch_due_special_battle_timers,
     remove_special_battle_timer,
 )
+from utils.db.spooky_hour_db import fetch_spooky_hour
 from utils.logs.pretty_log import pretty_log
-from config.aesthetic import Emojis
+
+
 # 🍭 Background task to check for due special battle timers
 async def special_battle_timer_checker(bot: discord.Client):
     """Background task that checks for due special battle timers every minute"""
+
+
+    # Check if spooky hour is active
+    spooky_hour = await fetch_spooky_hour(bot)
+    if not spooky_hour:
+        return  # No spooky hour active, skip checking battle timers
+
+
+    # Fetch due special battle timers
     due_timers = await fetch_due_special_battle_timers(bot)
     if not due_timers:
         return  # No due timers
@@ -24,9 +36,7 @@ async def special_battle_timer_checker(bot: discord.Client):
             member = channel.guild.get_member(user_id)
             if member:
                 # Remove timer from database
-                content = (
-                    f"{Emojis.battle_timer} {member.mention}, you can now battle {npc_name.title()} again!"
-                )
+                content = f"{Emojis.battle_timer} {member.mention}, you can now battle {npc_name.title()} again!"
                 desc = f";b npc {npc_name}"
                 embed = discord.Embed(description=desc, color=0x00FF00)
                 try:
