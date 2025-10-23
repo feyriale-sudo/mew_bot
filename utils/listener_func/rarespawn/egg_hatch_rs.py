@@ -3,7 +3,7 @@ import re
 import discord
 
 from config.rarity import *
-from config.settings import Channels, Roles
+from config.settings import Channels, Roles, users, MAIN_SERVER_ID
 from utils.logs.pretty_log import pretty_log
 from utils.pokemeow.get_pokemeow_reply import get_pokemeow_reply_member
 
@@ -35,11 +35,14 @@ RARE_EGG_EXCLUSIVES = [
 SUPER_RARE_EGG_EXCLUSIVE = ["carbink", "mimikyu"]
 REAL_RS_CHANNEL_ID = Channels.rare_spawn
 TEST_RS_CHANNEL_ID = 1128425613447929859
-
+valid_user_ids = [
+    users.skaia,
+    users.night,
+]
 # ❀─────────────────────────────────────────❀
 #      💖  Egg Hatch Listener
 # ❀─────────────────────────────────────────❀
-async def egg_rarespawn_handler(bot, message: discord.Message):
+async def egg_rarespawn_handler(bot:discord.Client, message: discord.Message):
     """
     Handles egg hatch messages from PokéMeow to identify rare spawns.
     """
@@ -75,6 +78,10 @@ async def egg_rarespawn_handler(bot, message: discord.Message):
     user_member = await get_pokemeow_reply_member(message)
     if not user_member:
         return
+    if user_member.id not in valid_user_ids:
+        return
+
+    skaia_server = bot.get_guild(MAIN_SERVER_ID)
 
     image_url = embed.image.url if embed.image else None
     raw_pokemon_name = pokemon_name.lower()
@@ -106,7 +113,9 @@ async def egg_rarespawn_handler(bot, message: discord.Message):
         rarity_emoji=rarity_emoji
     )
 
-    rarespawn_channel = bot.get_channel(REAL_RS_CHANNEL_ID)  # Use bot.get_channel
+    rarespawn_channel = skaia_server.get_channel(
+        REAL_RS_CHANNEL_ID
+    )  # Use bot.get_channel
     if rarespawn_channel:
         await rarespawn_channel.send(content=content, embed=embed)
         pretty_log(

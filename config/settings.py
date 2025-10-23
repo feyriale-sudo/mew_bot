@@ -17,3 +17,7 @@ class Categories:
 
 class Roles:
     rare_spawn = 1425655985304764567
+
+class users:
+    skaia = 110764096298721280
+    night = 338954233560694784

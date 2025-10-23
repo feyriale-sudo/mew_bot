@@ -4,7 +4,7 @@ import discord
 
 from config.aesthetic import Emojis
 from config.rarity import *
-from config.settings import Channels, Roles
+from config.settings import MAIN_SERVER_ID, Channels, Roles, users
 from utils.cache.cache_list import market_value_cache
 from utils.logs.debug_logs import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
@@ -18,12 +18,14 @@ HALLOWEEN_COLOR = 0xFFA500  # orange
 REAL_RS_CHANNEL_ID = Channels.rare_spawn
 TEST_RS_CHANNEL_ID = 1128425613447929859
 
+valid_user_ids = [users.skaia, users.night]
+
 
 # ❀─────────────────────────────────────────❀
 #      💖  Catch and Fish Listener
 # ❀─────────────────────────────────────────❀
 async def catch_and_fish_message_rare_spawn_handler(
-    bot, before: discord.Message, after: discord.Message
+    bot: discord.Client, before: discord.Message, after: discord.Message
 ):
     """
     Handles catch and fish messages from PokéMeow to identify rare spawns.
@@ -75,6 +77,10 @@ async def catch_and_fish_message_rare_spawn_handler(
     if not member:
         debug_log("Could not resolve member from message.", highlight=True)
         return
+    if member.id not in valid_user_ids:
+        return
+
+    skaia_server = bot.get_guild(MAIN_SERVER_ID)
     spawn_type = "pokemon" if embed_color != FISHING_COLOR else "fish"
     debug_log(f"Spawn type determined: {spawn_type}")
 
@@ -205,7 +211,7 @@ async def catch_and_fish_message_rare_spawn_handler(
         ball_emoji=ball_emoji,
     )
 
-    rarespawn_channel = member.guild.get_channel(REAL_RS_CHANNEL_ID)
+    rarespawn_channel = skaia_server.get_channel(REAL_RS_CHANNEL_ID)
     if rarespawn_channel:
         try:
             await rarespawn_channel.send(content=content, embed=embed)

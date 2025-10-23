@@ -204,7 +204,7 @@ class UtilitySettingsView(discord.ui.View):
             }.get(new_state, "OFF")
 
             await interaction.edit_original_response(
-                content=f"Modify your Timer Settings:\n🎯 Faction Ball Alert set to **{display_text}**",
+                content=f"Modify your Faction Ball Alert Settings:\n🎯 Faction Ball Alert set to **{display_text}**",
                 view=self,
             )
 
