@@ -39,6 +39,7 @@ valid_user_ids = [
     users.skaia,
     users.night,
 ]
+processed_egg_hatches = set()
 # ❀─────────────────────────────────────────❀
 #      💖  Egg Hatch Listener
 # ❀─────────────────────────────────────────❀
@@ -82,6 +83,10 @@ async def egg_rarespawn_handler(bot:discord.Client, message: discord.Message):
         return
 
     skaia_server = bot.get_guild(MAIN_SERVER_ID)
+
+    if message.id in processed_egg_hatches:
+        return
+    processed_egg_hatches.add(message.id)
 
     image_url = embed.image.url if embed.image else None
     raw_pokemon_name = pokemon_name.lower()

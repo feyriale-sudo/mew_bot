@@ -18,7 +18,8 @@ from utils.background_task.scheduler import setup_scheduler
 from utils.cache.centralized_cache import load_all_caches
 from utils.db.get_pg_pool import *
 from utils.logs.pretty_log import pretty_log, set_mew_bot
-
+from utils.listener_func.rarespawn.egg_hatch_rs import processed_egg_hatches
+from utils.listener_func.rarespawn.catch_and_fish import processed_catch_and_fish_msgs
 # ❀───────────────────────────────❀
 #       💖  Suppress Logs  💖
 # ❀───────────────────────────────❀
@@ -122,6 +123,14 @@ async def refresh_all_caches():
         return
 
     await load_all_caches(bot)
+
+    # Clear processed messsage ids
+    processed_egg_hatches.clear()
+    processed_catch_and_fish_msgs.clear()
+    pretty_log(
+        tag="cache",
+        message="All caches refreshed and processed message IDs cleared.",
+    )
 
 
 # ❀───────────────────────────────❀

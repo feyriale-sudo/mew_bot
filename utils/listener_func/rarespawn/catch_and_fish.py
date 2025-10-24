@@ -20,7 +20,7 @@ TEST_RS_CHANNEL_ID = 1128425613447929859
 
 valid_user_ids = [users.skaia, users.night]
 
-
+processed_catch_and_fish_msgs = set()
 # ❀─────────────────────────────────────────❀
 #      💖  Catch and Fish Listener
 # ❀─────────────────────────────────────────❀
@@ -80,6 +80,10 @@ async def catch_and_fish_message_rare_spawn_handler(
     if member.id not in valid_user_ids:
         return
 
+    if after.id in processed_catch_and_fish_msgs:
+        return
+    processed_catch_and_fish_msgs.add(after.id)
+    
     skaia_server = bot.get_guild(MAIN_SERVER_ID)
     spawn_type = "pokemon" if embed_color != FISHING_COLOR else "fish"
     debug_log(f"Spawn type determined: {spawn_type}")
