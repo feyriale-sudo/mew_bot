@@ -1,4 +1,6 @@
 class Emojis:
+    next = "<:right:1433785954547535872>"
+    back = "<:left:1433785888718192780>"
     egg = "<a:egg:1428959985932566579>"
     quest = "<a:quest:1426528728619417671>"
     beastball = "<:beastball:1427213254878433383>"

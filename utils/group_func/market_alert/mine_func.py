@@ -15,7 +15,7 @@ class MarketAlertPaginator(discord.ui.View):
         self.embeds = embeds
         self.index = 0
 
-    @discord.ui.button(label="⬅️ Prev", style=discord.ButtonStyle.secondary)
+    @discord.ui.button(emoji=Emojis.back, style=discord.ButtonStyle.secondary)
     async def prev_page(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
@@ -24,7 +24,7 @@ class MarketAlertPaginator(discord.ui.View):
             embed=self.embeds[self.index], view=self
         )
 
-    @discord.ui.button(label="➡️ Next", style=discord.ButtonStyle.secondary)
+    @discord.ui.button(emoji=Emojis.next, style=discord.ButtonStyle.secondary)
     async def next_page(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):

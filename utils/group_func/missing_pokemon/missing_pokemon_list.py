@@ -35,7 +35,7 @@ class MissingPokemonPaginator(View):
         if self.max_page == 0:
             self.clear_items()  # <-- removes all buttons
 
-    @discord.ui.button(label="Previous", style=discord.ButtonStyle.primary)
+    @discord.ui.button(emoji=Emojis.back, style=discord.ButtonStyle.secondary)
     async def prev_button(self, interaction: discord.Interaction, button: Button):
         if interaction.user.id != self.user.id:
             await interaction.response.send_message(
@@ -47,7 +47,7 @@ class MissingPokemonPaginator(View):
             self.page = self.max_page
         await interaction.response.edit_message(embed=(await self.get_embed()))
 
-    @discord.ui.button(label="Next", style=discord.ButtonStyle.primary)
+    @discord.ui.button(emoji=Emojis.next, style=discord.ButtonStyle.secondary)
     async def next_button(self, interaction: discord.Interaction, button: Button):
         if interaction.user.id != self.user.id:
             await interaction.response.send_message(
