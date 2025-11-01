@@ -19,8 +19,28 @@ REAL_RS_CHANNEL_ID = Channels.rare_spawn
 TEST_RS_CHANNEL_ID = 1128425613447929859
 
 valid_user_ids = [users.skaia, users.night]
-
+rare_rarity = ["legendary", "shiny"]
 processed_catch_and_fish_msgs = set()
+
+
+# ❀─────────────────────────────────────────❀
+#      💖  Extract Rarity from Footer
+# ❀─────────────────────────────────────────❀
+def extract_rarity_from_footer(footer_text: str) -> str:
+    # Extract rarity from embed footer
+    rarity_match = re.search(r"Rarity:\s*([A-Za-z]+)", footer_text)
+    if rarity_match:
+        rarity = rarity_match.group(1).strip().lower().replace(" ", "")
+        debug_log(f"Extracted rarity: {rarity}")
+        return rarity
+    else:
+        debug_log(
+            f"Could not extract rarity from footer: {footer_text}",
+            highlight=True,
+        )
+        return None
+
+
 # ❀─────────────────────────────────────────❀
 #      💖  Catch and Fish Listener
 # ❀─────────────────────────────────────────❀
@@ -83,24 +103,12 @@ async def catch_and_fish_message_rare_spawn_handler(
     if after.id in processed_catch_and_fish_msgs:
         return
     processed_catch_and_fish_msgs.add(after.id)
-    
+
     skaia_server = bot.get_guild(MAIN_SERVER_ID)
     spawn_type = "pokemon" if embed_color != FISHING_COLOR else "fish"
     debug_log(f"Spawn type determined: {spawn_type}")
 
-    # Get Ball Used
-    ball_used = None
-    ball_emoji = None
-    ball_match = re.search(
-        r"<:([a-zA-Z0-9_]+):\d+>\s*([A-Za-z]+ball)", embed_description, re.IGNORECASE
-    )
-    if ball_match:
-        ball_used = ball_match.group(2).lower()  # "pokeball"
-        ball_emoji_name = ball_match.group(1)  # "pokeball"
-        ball_emoji = getattr(Emojis, ball_emoji_name, None)
-        debug_log(f"Ball used: {ball_used}, Ball emoji: {ball_emoji}")
-    else:
-        debug_log("No ball used found in description.")
+
 
     # Determine context and extract Pokemon name
     pokemon_name = ""
@@ -180,24 +188,33 @@ async def catch_and_fish_message_rare_spawn_handler(
         elif embed_color == rarity_meta["shiny"]["color"]:
             rarity = "shiny"
             debug_log("Detected shiny pokemon spawn.")
-        elif (
-            embed_color == rarity_meta["event_exclusive"]["color"]
-            or embed_color == rarity_meta["halloween"]["color"]
-        ):
-            rarity = "event_exclusive"
-            debug_log("Detected event exclusive or halloween pokemon spawn.")
+
+        # For event exclusive extract rarity from footer
+        elif embed_color == rarity_meta["event_exclusive"]["color"]:
             # Extract rarity from embed footer
+            footer_text = embed.footer.text
             if embed.footer and embed.footer.text:
-                footer_text = embed.footer.text
-                rarity_match = re.search(r"Rarity:\s*([A-Za-z]+)", footer_text)
-                if rarity_match:
-                    rarity = rarity_match.group(1).strip().lower().replace(" ", "")
-                    debug_log(f"Extracted rarity: {rarity}")
-                else:
-                    debug_log(
-                        f"Could not extract rarity from footer: {footer_text}",
-                        highlight=True,
-                    )
+                rarity = extract_rarity_from_footer(footer_text)
+            else:
+                return  # Cannot determine rarity without footer
+
+        # If halloween color embed or unknown color
+        elif embed_color == rarity_meta["halloween"]["color"] or embed_color not in [
+            meta["color"] for meta in rarity_meta.values() if "color" in meta
+        ]:
+            # Extract rarity from embed footer
+            if not embed.footer or not getattr(embed.footer, "text", None):
+                return  # Cannot determine rarity without footer
+
+            footer_text = embed.footer.text
+            rarity = extract_rarity_from_footer(footer_text)
+            if not rarity or rarity not in rare_rarity:
+                debug_log(
+                    f"Extracted rarity '{rarity}' is not in rare rarities.",
+                    highlight=True,
+                )
+                return  # Not a rare spawn
+
     rarity_emoji = rarity_meta.get(rarity, {}).get("emoji", "")
     display_pokemon_name = pokemon_name.title()
     image_url = embed.image.url if embed.image else None

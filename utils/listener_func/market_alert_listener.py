@@ -17,8 +17,8 @@ from utils.cache.cache_list import (
     market_value_cache,
     missing_pokemon_cache,
 )
-from utils.logs.pretty_log import pretty_log
 from utils.db.market_value_db_func import set_market_value
+from utils.logs.pretty_log import pretty_log
 
 PokeCoin = Emojis.PokeCoin
 
@@ -106,7 +106,6 @@ async def process_market_alert_message(
     listed_price = int(match_price.group(1).replace(",", "")) if match_price else 0
     original_id = fields.get("ID", "0")
     embed_color = embed.color.value
-
 
     # 💎────────────────────────────────────────────
     #           🏪 Update Market Value Cache & DB
@@ -287,7 +286,11 @@ async def process_market_alert_message(
             footer_note = "This Pokémon is missing from your box! 🌸"
         else:
             footer_note = "Please check listing before purchase 💫"
-        new_embed.set_footer(text=footer_note)
+
+        guild = message.guild
+        new_embed.set_footer(
+            text=footer_note, icon_url=guild.icon.url if guild else None
+        )
 
         # 🩵 Try to fetch channel safely
         channel = bot.get_channel(target_channel_id)
