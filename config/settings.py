@@ -1,3 +1,9 @@
+from config.fairy_tale_constants import (
+    FAIRY_TAIL__ROLES,
+    FAIRY_TAIL__TEXT_CHANNELS,
+    FAIRY_TAIL_USER_IDS,
+)
+
 MAIN_SERVER_ID = 1297676395195007046
 POKEMEOW_APPLICATION_ID = 664508672713424926
 
@@ -6,10 +12,28 @@ FISH_TIMER = 25
 POKEMON_TIMER = 11
 BATTLE_TIMER = 60
 
+
+CHECKLIST_SETTINGS_MAP = {
+    FAIRY_TAIL_USER_IDS.skaia: {
+        "channel_id": FAIRY_TAIL__TEXT_CHANNELS.fluoɾescence,
+        "role_id": FAIRY_TAIL__ROLES.ethereal,
+    },
+    FAIRY_TAIL_USER_IDS.night: {
+        "channel_id": FAIRY_TAIL__TEXT_CHANNELS.sombre,
+        "role_id": FAIRY_TAIL__ROLES.eerie,
+    },
+    FAIRY_TAIL_USER_IDS.khy: {
+        "channel_id": FAIRY_TAIL__TEXT_CHANNELS.testloɢ,
+        "role_id": FAIRY_TAIL__ROLES.khy,
+    },
+}
+
+
 class Channels:
     bot_logs = 1422414881944240148
     reminders = 1370878801277358080
     rare_spawn = 1425655938760704070
+
 
 class Categories:
     Market_Feed = 1422415053294141472
@@ -17,6 +41,7 @@ class Categories:
 
 class Roles:
     rare_spawn = 1425655985304764567
+
 
 class users:
     skaia = 110764096298721280

@@ -68,7 +68,7 @@ class MissingPokemonPaginator(View):
         # 🩷 Build a beautiful list display
         description_lines = []
         for idx, r in enumerate(page_entries, start=start + 1):
-            pokemon = r["pokemon_name"]
+            pokemon = r["pokemon_name"].title()
             dex = r["dex"]
             role_id = r.get("role_id")
             channel_id = r.get("channel_id")
@@ -88,7 +88,7 @@ class MissingPokemonPaginator(View):
             description_lines = ["*No missing Pokémon entries found.*"]
 
         embed = discord.Embed(
-            title=f"🐰 {self.user.name}'s Missing Pokémon ({len(self.entries)})",
+            title=f"🐰 Missing Pokémon Checklist ({len(self.entries)})",
             description="\n".join(description_lines),
         )
 

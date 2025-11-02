@@ -7,9 +7,11 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from utils.db.missing_pokemon_db_func import user_missing_pokemon_autocomplete
 from utils.essentials.command_safe import run_command_safe
 from utils.group_func.missing_pokemon import *
-from utils.db.missing_pokemon_db_func import user_missing_pokemon_autocomplete
+from utils.pokemeow.autocomplete import pokemon_autocomplete
+
 
 # 🎀────────────────────────────────────────────
 #           🌸 MissingPokemon Cog Setup 🌸
@@ -21,28 +23,49 @@ class MissingPokemon(commands.Cog):
     # 🎀────────────────────────────────────────────
     #           🌸 Slash Command Group 🌸
     # 🎀────────────────────────────────────────────
-    missing_pokemon_group = app_commands.Group(
-        name="missing-pokemon", description="Commands related to missing pokemon"
+    checklist_group = app_commands.Group(
+        name="checklist", description="Commands related to missing pokemon"
     )
 
     # 🎀────────────────────────────────────────────
-    #          🌸 /missing-pokemon add 🌸
+    #          🌸 /checklist add 🌸
     # 🎀────────────────────────────────────────────
-    @missing_pokemon_group.command(
-        name="add", description="Adds missing Pokémon from your ;list pokemon command"
+    @checklist_group.command(
+        name="add", description="Adds a missing Pokémon to your checklist"
     )
+    @app_commands.autocomplete(pokemon=pokemon_autocomplete)  # 👈 attach autocomplete
     @app_commands.describe(
-        message_link="Link to the PokéMeow message (must have embed with Pokémon list)",
-        channel="Channel to send alerts",
-        role="Optional role to ping",
-        skip="What variant to skip (if any)",
+        pokemon="Name of the Pokémon",
     )
     async def missing_pokemon_add(
         self,
         interaction: discord.Interaction,
+        pokemon: str,
+    ):
+        slash_cmd_name = "checklist add"
+
+        await run_command_safe(
+            bot=self.bot,
+            interaction=interaction,
+            slash_cmd_name=slash_cmd_name,
+            command_func=missing_pokemon_add_func,
+            pokemon=pokemon,
+        )
+
+    # 🎀────────────────────────────────────────────
+    #          🌸 /checklist box 🌸
+    # 🎀────────────────────────────────────────────
+    @checklist_group.command(
+        name="box", description="Adds missing Pokémon from your ;list pokemon command"
+    )
+    @app_commands.describe(
+        message_link="Link to the PokéMeow message (must have embed with Pokémon list)",
+        skip="What variant to skip (if any)",
+    )
+    async def missing_pokemon_box(
+        self,
+        interaction: discord.Interaction,
         message_link: str,
-        channel: discord.TextChannel,
-        role: discord.Role | None = None,
         skip: Literal[
             "Regular",
             "Shiny",
@@ -52,26 +75,25 @@ class MissingPokemon(commands.Cog):
             "Shiny and Golden",
         ] = None,
     ):
-        slash_cmd_name = "missing-pokemon add"
+        slash_cmd_name = "checklist add"
 
         await run_command_safe(
             bot=self.bot,
             interaction=interaction,
             slash_cmd_name=slash_cmd_name,
-            command_func=missing_pokemon_add_func,
+            command_func=missing_pokemon_box_func,
             message_link=message_link,
-            channel=channel,
-            role=role,
             skip=skip,
         )
+
     # 🎀────────────────────────────────────────────
-    #          🌸 /missing-pokemon list 🌸
+    #          🌸 /checklist view 🌸
     # 🎀────────────────────────────────────────────
-    @missing_pokemon_group.command(
-        name="list", description="List all of your missing Pokémon entries"
+    @checklist_group.command(
+        name="view", description="Lets you view all of your missing Pokémon entries"
     )
     async def missing_pokemon_list(self, interaction: discord.Interaction):
-        slash_cmd_name = "missing-pokemon list"
+        slash_cmd_name = "checklist view"
 
         await run_command_safe(
             bot=self.bot,
@@ -79,11 +101,13 @@ class MissingPokemon(commands.Cog):
             slash_cmd_name=slash_cmd_name,
             command_func=missing_pokemon_list_func,
         )
+
     # 🎀────────────────────────────────────────────
-    #          🌸 /missing-pokemon remove 🌸
+    #          🌸 /checklist remove 🌸
     # 🎀────────────────────────────────────────────
-    @missing_pokemon_group.command(
-        name="remove", description="Removes a missing Pokémon entry by Dex number or all"
+    @checklist_group.command(
+        name="remove",
+        description="Removes a missing Pokémon entry by Dex number or all",
     )
     @app_commands.autocomplete(
         pokemon=user_missing_pokemon_autocomplete
@@ -91,9 +115,11 @@ class MissingPokemon(commands.Cog):
     @app_commands.describe(
         pokemon="Pokemon name, Dex number, or 'all' to remove all alerts"
     )
-    async def missing_pokemon_remove(self, interaction: discord.Interaction, pokemon: str):
+    async def missing_pokemon_remove(
+        self, interaction: discord.Interaction, pokemon: str
+    ):
 
-        slash_cmd_name = "missing-pokemon remove"
+        slash_cmd_name = "checklist remove"
 
         await run_command_safe(
             bot=self.bot,

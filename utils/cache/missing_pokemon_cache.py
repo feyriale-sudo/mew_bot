@@ -34,7 +34,6 @@ async def load_missing_pokemon_cache(bot):
 
     pretty_log(
         tag="missing",
-        label="MISSING POKÉMON",
         message=f"Loaded {len(missing_pokemon_cache)} missing Pokémon into cache",
     )
     return missing_pokemon_cache
@@ -168,7 +167,6 @@ def insert_missing(entry: dict):
                 break
         pretty_log(
             tag="missing",
-            label="MISSING POKÉMON",
             message=f"Updated missing Pokémon for {entry['user_name']} (Dex {entry['dex']})",
         )
     else:
@@ -176,7 +174,6 @@ def insert_missing(entry: dict):
         _missing_pokemon_index[key] = entry
         pretty_log(
             tag="missing",
-            label="MISSING POKÉMON",
             message=f"Inserted missing Pokémon for {entry['user_name']} (Dex {entry['dex']})",
         )
 
@@ -223,7 +220,7 @@ def remove_missing(user_id: int, dex: int):
         if removed_any
         else f"No missing Pokémon found to remove (Dex {dex}) for user {user_id}"
     )
-    pretty_log(tag="missing", label="MISSING POKÉMON", message=msg)
+    pretty_log(tag="missing", message=msg)
 
 
 # ❀─────────────────────────────────────────❀
