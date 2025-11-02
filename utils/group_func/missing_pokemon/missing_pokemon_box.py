@@ -168,7 +168,7 @@ async def missing_pokemon_box_func(
     bot: commands.Bot,
     interaction: discord.Interaction,
     message_link: str,
-    skip: str = None,
+    exemption: str = None,
 ):
     handler = await pretty_defer(
         interaction=interaction,
@@ -212,7 +212,7 @@ async def missing_pokemon_box_func(
         "Regular and Golden": ["Regular", "Golden"],
         "Shiny and Golden": ["Shiny", "Golden"],
     }
-    skipped_categories = skip_map.get(skip, [])
+    skipped_categories = skip_map.get(exemption, [])
 
     # Build pastel pink embed
     result_embed = discord.Embed(
@@ -226,7 +226,7 @@ async def missing_pokemon_box_func(
         if category in skipped_categories:
             # Show skipped notice instead of listing Pokémon
             result_embed.add_field(
-                name=f"💗 {category}", value=f"Skipped ({skip})", inline=False
+                name=f"💗 {category}", value=f"Exemption ({exemption})", inline=False
             )
         else:
             # Format tuples (dex, name) as "Dex • Name"

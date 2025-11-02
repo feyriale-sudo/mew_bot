@@ -60,13 +60,13 @@ class MissingPokemon(commands.Cog):
     )
     @app_commands.describe(
         message_link="Link to the PokéMeow message (must have embed with Pokémon list)",
-        skip="What variant to skip (if any)",
+        exemption="What variant to exempt (if any)",
     )
     async def missing_pokemon_box(
         self,
         interaction: discord.Interaction,
         message_link: str,
-        skip: Literal[
+        exemption: Literal[
             "Regular",
             "Shiny",
             "Golden",
@@ -83,7 +83,7 @@ class MissingPokemon(commands.Cog):
             slash_cmd_name=slash_cmd_name,
             command_func=missing_pokemon_box_func,
             message_link=message_link,
-            skip=skip,
+            exemption=exemption,
         )
 
     # 🎀────────────────────────────────────────────
