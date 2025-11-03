@@ -7,10 +7,11 @@ from utils.db.spooky_hour_db import (
     remove_spooky_hour,
     upsert_spooky_hour,
 )
+from config.fairy_tale_constants import FAIRY_TAIL__ROLES
 from utils.logs.pretty_log import pretty_log
 from config.settings import MAIN_SERVER_ID
 BUMP_CHANNEL_ID = 1370878801277358080
-SPOOKY_HOUR_ROLE_ID = 1330644911946465362
+SPOOKY_HOUR_ROLE_ID = FAIRY_TAIL__ROLES.ethereal
 
 
 # 🤍💫────────────────────────────────────────────💫🤍
