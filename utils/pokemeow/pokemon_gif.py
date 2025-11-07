@@ -24,7 +24,7 @@ async def get_pokemon_gif(input_name: str):
 
     remaining_name = "-".join(name_parts)
 
-    regions = {"alolan": "-alola", "galarian": "-galar", "hisuian": "-hisui"}
+    regions = {"alolan": "-alola", "galarian": "-galar", "hisuian": "-hisui", "paldean": "-paldea"}
     for region_prefix, suffix in regions.items():
         if remaining_name.startswith(region_prefix + "-"):
             region_suffix = suffix
