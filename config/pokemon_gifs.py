@@ -27,7 +27,7 @@ class REGULAR_POKEMON_URL:
     iron_valiant = "https://media.discordapp.net/attachments/886725599123636225/1423382289840341123/iron-variant.gif?ex=68e0c44f&is=68df72cf&hm=debf4933fb8ce5d2b83d35a569bf6343817cfe073c0393d8197c5460748ca97e&=&width=61&height=107"
     enamorous_therian = "https://images-ext-1.discordapp.net/external/W2twYEqZSNqd2VgdB8-h6BjWt9vNlJTcBGvIu-eWPx0/https/play.pokemonshowdown.com/sprites/ani/enamorus-therian.gif?width=83&height=80"
     pikachu_partner = "https://images-ext-1.discordapp.net/external/PsEp46xUWCw_2pz_0h3ubj_1BX7_G_J6Bdt_BW322I0/https/play.pokemonshowdown.com/sprites/ani/pikachu-partner.gif?width=68&height=66"
-    koraido = "https://media.discordapp.net/attachments/1323758555605631001/1435999397459787879/koraidon.gif?ex=690f53a7&is=690e0227&hm=1d53039bea3b12405303c8448da7bfa63810f985e8a1be4fafc2004eabc11ccb&=&width=119&height=141"
+    koraidon = "https://media.discordapp.net/attachments/1323758555605631001/1435999397459787879/koraidon.gif?ex=690f53a7&is=690e0227&hm=1d53039bea3b12405303c8448da7bfa63810f985e8a1be4fafc2004eabc11ccb&=&width=119&height=141"
 
 
 class GOLDEN_MEGA_POKEMON_URL:
@@ -96,7 +96,8 @@ class SHINY_POKEMON_URL:
 
 
 class GOLDEN_POKEMON_URL:
-    galarian_moltres = "https://media.discordapp.net/attachments/1323758555605631001/1435999397459787879/koraidon.gif?ex=690f53a7&is=690e0227&hm=1d53039bea3b12405303c8448da7bfa63810f985e8a1be4fafc2004eabc11ccb&=&width=119&height=141"
+    galarian_moltres = "https://media.discordapp.net/attachments/982057517884510249/1427746320583753869/7758.gif?ex=690f9fe1&is=690e4e61&hm=cd6809044d5e493b14bf599e48a1de28e5dae9c3a4cbebc4c347ed53aeafc1cb&=&width=174&height=163"
+
     cofagrigus = "https://images-ext-1.discordapp.net/external/jWdJJUs7ra5BeqoRYPRK8j2a5OEdeZdI92EaFgc8UGE/https/graphics.tppcrpg.net/xy/golden/563M.gif?width=186&height=134"
     guzzlord = "https://images-ext-1.discordapp.net/external/0Zs7SSh5ppBzvykfvQFJSlNwoMss0_evpESQEizCJ_0/https/graphics.tppcrpg.net/xy/golden/799M.gif?width=154&height=99"
     yamask = "https://images-ext-1.discordapp.net/external/eeG-4VKrhmd82RSwqmkAGjUkS_qRIleCXdsHwe1hUc4/https/graphics.tppcrpg.net/xy/golden/562M.gif?width=72&height=75"
