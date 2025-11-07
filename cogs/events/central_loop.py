@@ -52,11 +52,11 @@ class CentralLoop(commands.Cog):
                 # 🐱 Check if any Pokemeow schedule reminder is due
                 await pokemeow_schedule_checker(self.bot)
 
-                # 🌹 Check for due special battle timers
-                await special_battle_timer_checker(self.bot)
+                # 🌹 Check for due special battle timers (Disabled for now)
+                #await special_battle_timer_checker(self.bot)
 
-                # 🍑 Check and handle Spooky Hour expiry
-                await check_and_handle_spooky_hour_expiry(self.bot)
+                # 🍑 Check and handle Spooky Hour expiry (Disabled for now)
+                #await check_and_handle_spooky_hour_expiry(self.bot)
 
             except Exception as e:
                 pretty_log(
@@ -85,7 +85,7 @@ async def setup(bot: commands.Bot):
     print("  ─────────────────────────────────────────────")
     print("  ✅ 🧭  process_due_reminders")
     print("  ✅ 🐱  pokemeow_schedule_checker")
-    print("  ✅ 🌹  special_battle_timer_checker")
-    print("  ✅ 🍑  check_and_handle_spooky_hour_expiry")
+    #print("  ✅ 🌹  special_battle_timer_checker")
+    #print("  ✅ 🍑  check_and_handle_spooky_hour_expiry")
     print("  🍭 CentralLoop ticking every 60 seconds!")
     print("  ─────────────────────────────────────────────\n")

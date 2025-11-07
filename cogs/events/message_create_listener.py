@@ -217,23 +217,23 @@ class MessageCreateListener(commands.Cog):
                     await faction_hunt_alert(self.bot, before=message, after=message)
 
             # 💜────────────────────────────────────────────
-            #        ⏰ Special Battle NPC Timer Processing Only
+            #        ⏰ Special Battle NPC Timer Processing Only (Disabled for now)
             # 💜────────────────────────────────────────────
-            if first_embed:
+            """if first_embed:
                 if (
                     first_embed.description
                     and "challenged <:irida:1428149067673767996> **Irida** to a battle!"
                     in first_embed.description
                 ):
-                    await special_battle_npc_listener(self.bot, message)
+                    await special_battle_npc_listener(self.bot, message)"""
 
             # 💜────────────────────────────────────────────
-            #        🎃 Spooky Hour HW Embed Processing Only
+            #        🎃 Spooky Hour HW Embed Processing Only (Disabled for now)
             # 💜────────────────────────────────────────────
-            if first_embed:
+            """if first_embed:
                 embed_author_text = first_embed.author.name if first_embed.author else ""
                 if hw_embed_trigger in embed_author_text.lower():
-                    await handle_spooky_hour_hw_embed(self.bot, message)
+                    await handle_spooky_hour_hw_embed(self.bot, message)"""
             # 💜────────────────────────────────────────────
             #        🏆 Quest Embed Processing Only
             # 💜────────────────────────────────────────────
