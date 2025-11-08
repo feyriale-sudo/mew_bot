@@ -3,6 +3,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from utils.background_task.daily_fa_ball_reset import daily_faction_ball_reset
+from utils.background_task.daily_pokemeow_reminder import daily_pokemeow_reminder
 from utils.essentials.schedule_manager import SchedulerManager
 from utils.logs.pretty_log import pretty_log
 
@@ -28,6 +29,21 @@ async def setup_scheduler(bot):
     pretty_log(
         tag="background_task",
         message="Scheduled daily faction ball reset at 12:00 AM EST.",
+        bot=bot,
+    )
+
+    # Daily Pokemeow Reminder at 12 AM EST
+    scheduler_manager.add_cron_job(
+        daily_pokemeow_reminder,
+        name="daily_pokemeow_reminder",
+        hour=0,
+        minute=0,
+        args=[bot],
+        timezone=NYC,
+    )
+    pretty_log(
+        tag="background_task",
+        message="Scheduled daily Pokemeow reminder at 12:00 AM EST.",
         bot=bot,
     )
 
