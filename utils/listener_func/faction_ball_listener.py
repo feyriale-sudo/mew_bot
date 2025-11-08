@@ -55,7 +55,7 @@ async def extract_faction_ball_from_daily(bot, message: discord.Message):
 
     # Check if there user has a faction or not
     member_info = user_info_cache.get(member_id)
-    if not member_info and not member_info.get("faction"):
+    if not member_info:
         # New user upsert in db (Db will also update cache)
         await set_user_info(
             bot,
@@ -64,7 +64,7 @@ async def extract_faction_ball_from_daily(bot, message: discord.Message):
             faction=faction,
             patreon_tier=None,
         )
-    elif member_info and not member_info.get("faction"):
+    elif not member_info.get("faction"):
         # Has row but no faction set (Update db and cache)
         await update_faction(
             bot,
