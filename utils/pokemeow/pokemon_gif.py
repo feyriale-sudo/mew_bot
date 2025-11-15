@@ -15,7 +15,7 @@ hyphen_mon_names = [
 ]
 
 
-def get_pokemon_gif(input_name: str):
+async def get_pokemon_gif(input_name: str):
     """
     Returns the pokemon gif
     """
