@@ -1,8 +1,21 @@
 # inside get_pokemon_gif.py
 from typing import Literal
-from config.pokemon_gifs import *
 
-async def get_pokemon_gif(input_name: str):
+from config.pokemon_gifs import *
+from utils.logs.pretty_log import pretty_log
+
+hyphen_mon_names = [
+    "jangmo-o",
+    "hakamo-o",
+    "kommo-o",
+    "tapu-koko",
+    "tapu-lele",
+    "tapu-bulu",
+    "tapu-fini",
+]
+
+
+def get_pokemon_gif(input_name: str):
     """
     Returns the pokemon gif
     """
@@ -24,7 +37,12 @@ async def get_pokemon_gif(input_name: str):
 
     remaining_name = "-".join(name_parts)
 
-    regions = {"alolan": "-alola", "galarian": "-galar", "hisuian": "-hisui", "paldean": "-paldea"}
+    regions = {
+        "alolan": "-alola",
+        "galarian": "-galar",
+        "hisuian": "-hisui",
+        "paldean": "-paldea",
+    }
     for region_prefix, suffix in regions.items():
         if remaining_name.startswith(region_prefix + "-"):
             region_suffix = suffix
@@ -48,6 +66,18 @@ async def get_pokemon_gif(input_name: str):
         remaining_name = gmax_aliases[remaining_name]
 
     base_name = f"{remaining_name}{region_suffix}".lower()
+    # Remove "shiny" and "golden" from the input for comparison
+    compare_name = (
+        input_name.lower()
+        .replace("shiny", "")
+        .replace("golden", "")
+        .replace("_", "-")
+        .strip()
+    )
+    compare_name = " ".join(compare_name.split())  # Remove extra spaces
+    if compare_name in hyphen_mon_names:
+        base_name = base_name.replace("-", "")
+
     attr_name = remaining_name.replace("-", "_")
 
     gif_url = None
@@ -91,6 +121,10 @@ async def get_pokemon_gif(input_name: str):
 
     error = None
     if not gif_url:
-        error = f"Cannot find Pokémon GIF for '{original_input}'"
+        error = f"Cannot find Pokemon GIF for '{original_input}'"
 
+    pretty_log(
+        tag="debug" if gif_url else "error",
+        message=(f"Fetched GIF URL for '{gif_name}': {gif_url}" if gif_url else error),
+    )
     return gif_url
