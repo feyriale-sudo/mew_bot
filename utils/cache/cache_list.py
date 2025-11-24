@@ -2,9 +2,31 @@
 #      💜 Market Alert Cache (Global) 💜
 # ───────────────────────────────────────────────
 market_alert_cache: list[dict] = []
+# Structure
+# market_alert_cache = [
+#     {
+#         "user_id": 123456789,
+#         "pokemon": "Pikachu",
+#         "dex_number": 25,
+#         "max_price": 5000,
+#         "notify": True,
+#         "channel_id": 987654321,
+#         "role_id": 192837465
+#     },
 _market_alert_index: dict[tuple[str, int], dict] = (
     {}
 )  # key = (pokemon.lower(), channel_id)
+# Structure
+# _market_alert_index = {
+#     ("pikachu", 987654321): {
+#         "user_id": 123456789,
+#         "pokemon": "Pikachu",
+#         "dex_number": 25,
+#         "max_price": 5000,
+#         "notify": True,
+#         "channel_id": 987654321,
+#         "role_id": 192837465
+#     },
 
 # 🌸──────────────────────────────────────────────
 #      💜 Missing Pokémon Cache (Global) 💜

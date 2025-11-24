@@ -36,9 +36,9 @@ class RemindersPaginator(View):
                 "This is not your paginator.", ephemeral=True
             )
             return
-            self.page -= 1
-            if self.page < 0:
-                self.page = self.max_page
+        self.page -= 1
+        if self.page < 0:
+            self.page = self.max_page
         await interaction.response.edit_message(embed=(await self.get_embed()))
 
     @discord.ui.button(emoji=Emojis.next, style=discord.ButtonStyle.secondary)
