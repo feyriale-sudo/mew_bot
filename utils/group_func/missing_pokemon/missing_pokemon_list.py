@@ -15,7 +15,7 @@ from utils.db.missing_pokemon_db_func import (
 from utils.logs.pretty_log import pretty_log
 from utils.visuals.design_embed import design_embed
 from utils.visuals.pretty_defer import pretty_defer, pretty_error
-
+from utils.visuals.name_helpers import format_display_pokemon_name
 
 # 🌸───────────────────────────────────────────────🌸
 # 🩷 ⏰ PAGINATED MISSING POKEMON LIST FUNCTION          🩷
@@ -69,6 +69,7 @@ class MissingPokemonPaginator(View):
         description_lines = []
         for idx, r in enumerate(page_entries, start=start + 1):
             pokemon = r["pokemon_name"].title()
+            display_name = format_display_pokemon_name(pokemon)
             dex = r["dex"]
             role_id = r.get("role_id")
             channel_id = r.get("channel_id")
@@ -81,7 +82,7 @@ class MissingPokemonPaginator(View):
                 extra_info.append(f"<#{channel_id}>")  # mention the channel
 
             extras = f" 〔{'・'.join(extra_info)}〕" if extra_info else ""
-            description_lines.append(f"`{idx:>02}.` **{pokemon}** — #{dex}{extras}")
+            description_lines.append(f"`{idx:>02}.` **{display_name}** — #{dex}{extras}")
 
         # 🌸 Handle empty gracefully
         if not description_lines:

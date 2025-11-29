@@ -16,6 +16,7 @@ from utils.pokemeow.parsers import parse_special_mega_input, resolve_pokemon_inp
 from utils.visuals.design_embed import design_embed
 from utils.visuals.pretty_defer import pretty_defer, pretty_error
 from utils.parsers.number_parser import parse_compact_number
+from utils.visuals.name_helpers import format_display_pokemon_name
 
 async def update_market_alert_func(
     bot,
@@ -152,7 +153,8 @@ async def update_market_alert_func(
         return
 
     # ── Build confirmation embed ──
-    description = f"- **Pokemon:** {pokemon_name.title()} (Dex #{dex_number})\n"
+    display_name = format_display_pokemon_name(pokemon_name)
+    description = f"- **Pokemon:** {display_name} (Dex #{dex_number})\n"
 
     # Only add Updated Fields section if something changed
     updated_fields = []

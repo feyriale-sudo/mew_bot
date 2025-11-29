@@ -8,7 +8,7 @@ from utils.group_func.market_alert.market_alert_db_func import (
 )
 from utils.logs.pretty_log import pretty_log
 from utils.pokemeow.parsers import resolve_pokemon_input
-
+from utils.visuals.name_helpers import format_display_pokemon_name
 
 async def toggle_market_alert_func(
     bot, interaction: discord.Interaction, pokemon: str, value: bool
@@ -77,9 +77,10 @@ async def toggle_market_alert_func(
                 color=0xFF80A5,
             )
         else:
+            display_name = format_display_pokemon_name(target_name)
             embed = discord.Embed(
                 title="🌸 Market Alert Toggled",
-                description=f"Toggled your alert for **{target_name} (Dex #{dex_number})** "
+                description=f"Toggled your alert for **{display_name} (Dex #{dex_number})** "
                 f"to {'✅ Enabled' if value else '❌ Disabled'}.",
                 color=0xFF80A5,
             )

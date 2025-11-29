@@ -10,7 +10,7 @@ from utils.logs.pretty_log import pretty_log
 from utils.pokemeow.parsers import parse_special_mega_input, resolve_pokemon_input
 from utils.visuals.design_embed import design_embed
 from utils.visuals.pretty_defer import pretty_defer, pretty_error
-
+from utils.visuals.name_helpers import format_display_pokemon_name
 
 # 🎀────────────────────────────────────────────
 #        🌸 Missing Pokemon Add Func
@@ -87,7 +87,8 @@ async def missing_pokemon_add_func(
         )
         # 🌸 Success embed
         target_name = target_name.title()
-        desc = f"**Pokemon:** {target_name} #{dex_number}\n**Channel:** {channel.mention}\n"
+        display_name = format_display_pokemon_name(target_name)
+        desc = f"**Pokemon:** {display_name} #{dex_number}\n**Channel:** {channel.mention}\n"
         if role:
             desc += f"**Role:** {role.mention}\n"
         success_embed = discord.Embed(

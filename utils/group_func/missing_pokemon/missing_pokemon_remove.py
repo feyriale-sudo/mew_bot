@@ -13,7 +13,7 @@ from utils.db.missing_pokemon_db_func import (
 from utils.logs.pretty_log import pretty_log
 from utils.visuals.design_embed import design_embed
 from utils.visuals.pretty_defer import pretty_defer, pretty_error
-
+from utils.visuals.name_helpers import format_display_pokemon_name
 
 # ❀─────────────────────────────────────────❀
 #      💖  Remove Missing Pokémon Function
@@ -77,10 +77,10 @@ async def missing_pokemon_remove_func(
         channel = guild.get_channel(channel_id)
         role_id = entry.get("role_id")
         role = guild.get_role(role_id) if role_id else None
-
+        display_name = format_display_pokemon_name(pokemon_name)
         embed = discord.Embed(
             title="🐰 Checklist Pokémon Removed",
-            description=f"**Pokémon:** {pokemon_name} (#{dex}).",
+            description=f"**Pokémon:** {display_name} (#{dex}).",
         )
         footer_text = "✨ Pokémon sucessfully removed from your Checklist."
 

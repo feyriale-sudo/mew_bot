@@ -4,7 +4,7 @@ from config.aesthetic import *
 from utils.logs.pretty_log import pretty_log
 from utils.visuals.design_embed import design_embed
 from utils.visuals.pretty_defer import pretty_defer
-
+from utils.visuals.name_helpers import format_display_pokemon_name
 
 # 🍇──────────────────────────────
 #      🌀 Market Alert Paginator
@@ -99,7 +99,9 @@ async def mine_market_alerts_func(bot, interaction: discord.Interaction):
         char_count = len(embed.description)
 
         for alert in alerts:
-            field_name = f"{alert['pokemon'].title()} (Dex #{alert['dex_number']})"
+            pokemon_name = alert["pokemon"]
+            display_name = format_display_pokemon_name(pokemon_name)
+            field_name = f"{display_name} (Dex #{alert['dex_number']})"
             role_mention = f"<@&{alert['role_id']}>" if alert.get("role_id") else "None"
             notify_status = "✅ Enabled" if alert.get("notify", True) else "❌ Disabled"
             field_value = (

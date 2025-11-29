@@ -16,7 +16,7 @@ from utils.pokemeow.parsers import parse_special_mega_input, resolve_pokemon_inp
 from utils.visuals.design_embed import design_embed
 from utils.visuals.pretty_defer import pretty_defer, pretty_error
 from utils.parsers.number_parser import parse_compact_number
-
+from utils.visuals.name_helpers import format_display_pokemon_name
 async def add_market_alert_func(
     bot,
     interaction: discord.Interaction,
@@ -143,10 +143,10 @@ async def add_market_alert_func(
         return
 
     target_name = target_name.title()
-
+    display_name = format_display_pokemon_name(target_name)
     desc_lines = [
         f"- **Member:** {user.mention}",
-        f"- **Pokemon:** {target_name} #{dex_number}",
+        f"- **Pokemon:** {display_name} #{dex_number}",
         f"- **Max Price:** {PokeCoin} {max_price_int:,}",
         f"- **Channel:** {channel.mention}",
     ]
@@ -175,7 +175,7 @@ async def add_market_alert_func(
         desc_lines = [
             f"{display_count}\n",
             f"- **Member:** {user.mention}",
-            f"- **Pokemon:** {target_name} #{dex_number}",
+            f"- **Pokemon:** {display_name} #{dex_number}",
             f"- **Max Price:** {PokeCoin} {max_price_int:,}",
             f"- **Channel:** {channel.mention}",
         ]

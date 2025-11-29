@@ -19,6 +19,7 @@ from utils.cache.cache_list import (
 )
 from utils.db.market_value_db_func import set_market_value
 from utils.logs.pretty_log import pretty_log
+from utils.visuals.name_helpers import format_display_pokemon_name
 
 PokeCoin = Emojis.PokeCoin
 
@@ -262,8 +263,9 @@ async def process_market_alert_message(
         new_embed = discord.Embed(color=embed.color or 0x0855FB)
         if embed.thumbnail:
             new_embed.set_thumbnail(url=embed.thumbnail.url)
+        display_author_name = format_display_pokemon_name(embed_author_name)
         new_embed.set_author(
-            name=embed_author_name,
+            name=display_author_name,
             icon_url=embed.author.icon_url if embed.author else None,
         )
         new_embed.add_field(
@@ -333,6 +335,8 @@ async def process_market_alert_message(
                     role_mention = role.mention
 
         # 💬 Compose message
+        display_pokemon_name = format_display_pokemon_name(poke_name)
+        poke_name = display_pokemon_name
         content = (
             f"{role_mention} {poke_name} on market for {PokeCoin} {listed_price:,}"
         )

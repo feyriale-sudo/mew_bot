@@ -15,7 +15,7 @@ from utils.logs.pretty_log import pretty_log
 from utils.pokemeow.parsers import parse_special_mega_input, resolve_pokemon_input
 from utils.visuals.design_embed import design_embed
 from utils.visuals.pretty_defer import pretty_defer, pretty_error
-
+from utils.visuals.name_helpers import format_display_pokemon_name
 
 async def remove_market_alert_func(bot, interaction: discord.Interaction, pokemon: str):
     """
@@ -113,7 +113,8 @@ async def remove_market_alert_func(bot, interaction: discord.Interaction, pokemo
             if pokemon.isdigit():
                 removed_count = await remove_market_alert(bot, user_id, pokemon)
                 if removed_count > 0:
-                    removed_alerts.append((target_name.title(), pokemon))
+                    display_name = format_display_pokemon_name(target_name)
+                    removed_alerts.append((display_name, pokemon))
 
                     # 🌸 Remove single alert from cache
                     alert = next(
@@ -132,7 +133,8 @@ async def remove_market_alert_func(bot, interaction: discord.Interaction, pokemo
                     bot, user_id, target_name.lower()
                 )
                 if removed_count > 0:
-                    removed_alerts.append((target_name.title(), dex_number))
+                    display_name = format_display_pokemon_name(target_name)
+                    removed_alerts.append((display_name, dex_number))
 
                     # 🌸 Remove single alert from cache
                     from utils.cache.market_alert_cache import remove_alert

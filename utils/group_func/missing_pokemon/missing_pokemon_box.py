@@ -11,6 +11,7 @@ from utils.db.missing_pokemon_db_func import bulk_upsert_missing_pokemon
 from utils.logs.pretty_log import pretty_log
 from utils.parsers.message_link_parser import fetch_message_from_link
 from utils.visuals.pretty_defer import pretty_defer, pretty_error
+from utils.visuals.name_helpers import format_display_pokemon_name
 
 # 🌸──────────────────────────────────────────────
 # Emoji Tags
@@ -291,7 +292,7 @@ class RemoveDexModal(discord.ui.Modal):
             )
             for category, pokemons in self.missing_data.items():
                 if pokemons:
-                    formatted = [f"{dex:03d} • {name}" for dex, name in pokemons]
+                    formatted = [f"{dex:03d} • {format_display_pokemon_name(name)}" for dex, name in pokemons]
                     embed.add_field(
                         name=f"💖 {category}", value="\n".join(formatted), inline=False
                     )
