@@ -12,7 +12,7 @@ class Emojis:
     pokeball = "<:pokeball:1427213100050026576>"
     faction_alert = "<:faction:1426950619499069591>"
     item_hold = " <:item:1426853964762054676>"
-    sched_react = "<:cbreact:1426841452826202183>"
+    sched_react = "<:cbreact:1444213491442516139>"
     quest = "<a:quest:1426528728619417671>"
     catchbot = "<a:catchbot:1426528782684131410>"
     faction = "<a:faction:1426950619499069591>"
