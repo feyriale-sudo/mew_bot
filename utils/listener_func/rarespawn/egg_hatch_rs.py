@@ -33,6 +33,7 @@ RARE_EGG_EXCLUSIVES = [
     "nickit",
 ]
 SUPER_RARE_EGG_EXCLUSIVE = ["carbink", "mimikyu"]
+
 REAL_RS_CHANNEL_ID = Channels.rare_spawn
 TEST_RS_CHANNEL_ID = 1128425613447929859
 valid_user_ids = [

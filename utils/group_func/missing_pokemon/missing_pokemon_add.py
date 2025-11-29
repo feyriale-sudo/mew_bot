@@ -52,7 +52,10 @@ async def missing_pokemon_add_func(
 
     # 🌸 If input is Mega Pokemon
     elif any(
-        pokemon_title.startswith(f"{prefix}Mega ")
+        (
+            pokemon_title.startswith(f"{prefix}Mega ")
+            or pokemon_title.startswith(f"{prefix}Mega-")
+        )
         for prefix in ["", "Shiny ", "Golden "]
     ):
         dex_number = parse_special_mega_input(pokemon)
@@ -67,7 +70,7 @@ async def missing_pokemon_add_func(
     role_id = CHECKLIST_SETTINGS_MAP[user_id]["role_id"]
     channel = guild.get_channel(channel_id)
     role = guild.get_role(role_id) if role_id else None
-    
+
     try:
         await upsert_missing_pokemon(
             bot=bot,
