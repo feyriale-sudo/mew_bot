@@ -18,7 +18,7 @@ def resolve_pokemon_input(pokemon_input: str):
     - Name input (including shiny/golden prefixes, Mega forms)
     Returns: (display_name, dex_number)
     """
-    
+
     pokemon_input = pokemon_input.strip().lower()
 
     # ── Numeric Dex input ──
@@ -55,8 +55,10 @@ def resolve_pokemon_input(pokemon_input: str):
         elif pokemon_input.startswith("golden "):
             prefix = "Golden "
             base_name = pokemon_input[7:]
-        else:
+        elif "mega" in pokemon_input:
             base_name = normalize_mega_input(pokemon_input)
+        else:
+            base_name = pokemon_input
 
         chart_data = weakness_chart.get(base_name)
         if not chart_data or "dex" not in chart_data:
@@ -78,7 +80,8 @@ def resolve_pokemon_input(pokemon_input: str):
                 dex_number = chart_dex_int + 9000
             else:
                 dex_number = chart_dex_int
-
+        if "mega" in display_name.lower():
+            display_name = display_name.replace("-", " ")
         return display_name, dex_number
 
 

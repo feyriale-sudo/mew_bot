@@ -184,7 +184,7 @@ async def remove_market_alert_func(bot, interaction: discord.Interaction, pokemo
             embed=user_embed,
             user=user,
             footer_text=footer_text,
-            pokemon_name=name,
+            pokemon_name=name if pokemon.lower() != "all" else None,
         )
     else:
         user_embed = discord.Embed(
