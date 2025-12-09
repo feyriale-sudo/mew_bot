@@ -1,3 +1,4 @@
+
 weakness_chart = {   'abomasnow': {   '1/2x': ['water', 'electric', 'grass', 'ground'],
                      '1x': [   'normal',
                                'ice',

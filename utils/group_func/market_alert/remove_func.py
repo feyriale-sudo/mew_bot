@@ -209,7 +209,7 @@ async def remove_market_alert_func(bot, interaction: discord.Interaction, pokemo
         log_embed = await design_embed(
             embed=log_embed,
             user=user,
-            pokemon_name=name,
+            pokemon_name=name if pokemon.lower() != "all" else None,
         )
 
     # 🌸 Stop loader and show final embed

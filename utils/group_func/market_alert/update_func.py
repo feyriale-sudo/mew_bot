@@ -12,7 +12,7 @@ from utils.group_func.market_alert.market_alert_db_func import (
     update_market_alert,
 )
 from utils.logs.pretty_log import pretty_log
-from utils.pokemeow.parsers import parse_special_mega_input, resolve_pokemon_input
+from utils.pokemeow.new_parsers import resolve_pokemon_input
 from utils.visuals.design_embed import design_embed
 from utils.visuals.pretty_defer import pretty_defer, pretty_error
 from utils.parsers.number_parser import parse_compact_number
@@ -39,7 +39,10 @@ async def update_market_alert_func(
     channel_id = channel.id if channel else None
     role_obj = role
     role_id = role.id if role else None
-
+    pretty_log(
+        "info",
+        f"Pokemon Market Alert Update requested by {user.name} ({user_id}) for {pokemon}",
+        )
     # ── Normalize mobile role input ──
     if mobile_role_input:
         try:
