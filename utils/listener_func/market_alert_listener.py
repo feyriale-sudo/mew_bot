@@ -260,19 +260,14 @@ async def process_market_alert_message(
             target_channel_id = missing_entry["channel_id"]
 
         # 🧾 Build embed
-        new_embed = discord.Embed(color=embed.color or 0x0855FB)
+        desc = f";m b {original_id}"
+        new_embed = discord.Embed(color=embed.color or 0x0855FB, description=desc)
         if embed.thumbnail:
             new_embed.set_thumbnail(url=embed.thumbnail.url)
         display_author_name = format_display_pokemon_name(embed_author_name)
         new_embed.set_author(
             name=display_author_name,
             icon_url=embed.author.icon_url if embed.author else None,
-        )
-        new_embed.add_field(
-            name="Buy Command (iPhone)", value=f"`;m b {original_id}`", inline=False
-        )
-        new_embed.add_field(
-            name="Buy Command (Android)", value=f";m b {original_id}", inline=False
         )
 
         for name, value in fields.items():
