@@ -261,7 +261,9 @@ async def process_market_alert_message(
 
         # 🧾 Build embed
         desc = f";m b {original_id}"
-        new_embed = discord.Embed(color=embed.color or 0x0855FB, description=desc)
+        new_embed = discord.Embed(
+            title="Buy Command", color=embed.color or 0x0855FB, description=desc
+        )
         if embed.thumbnail:
             new_embed.set_thumbnail(url=embed.thumbnail.url)
         display_author_name = format_display_pokemon_name(embed_author_name)
