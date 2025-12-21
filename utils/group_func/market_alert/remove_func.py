@@ -12,7 +12,7 @@ from utils.group_func.market_alert.market_alert_db_func import (
     remove_market_alert,
 )
 from utils.logs.pretty_log import pretty_log
-from utils.pokemeow.parsers import parse_special_mega_input, resolve_pokemon_input
+from utils.pokemeow.new_parsers import resolve_pokemon_input
 from utils.visuals.design_embed import design_embed
 from utils.visuals.pretty_defer import pretty_defer, pretty_error
 from utils.visuals.name_helpers import format_display_pokemon_name
@@ -61,33 +61,7 @@ async def remove_market_alert_func(bot, interaction: discord.Interaction, pokemo
 
         else:
             # 🌸 EXISTING SINGLE POKÉMON LOGIC
-            pokemon_title = pokemon.title()
-            if pokemon.isdigit():
-                target_key = pokemon
-            else:
-                target_key = pokemon_title
-
-            try:
-                if any(
-                    (
-                        pokemon_title.startswith(f"{prefix}Mega ")
-                        or pokemon_title.startswith(f"{prefix}Mega-")
-                    )
-                    for prefix in ["", "Shiny ", "Golden "]
-                ):
-                    target_name = pokemon_title
-                    dex_number = parse_special_mega_input(pokemon)
-                else:
-                    for prefix in ["Shiny ", "Golden "]:
-                        if pokemon_title.startswith(prefix):
-                            target_name = pokemon_title
-                            _, dex_number = resolve_pokemon_input(pokemon_title)
-                        else:
-                            target_name, dex_number = resolve_pokemon_input(
-                                pokemon_title
-                            )
-            except ValueError as e:
-                raise ValueError(f"{e}")
+            target_name, dex_number = resolve_pokemon_input(pokemon)
 
             # 🌸 Check if alert exists before trying to remove
             user_alerts = await fetch_user_alerts(bot, user_id)
@@ -105,7 +79,7 @@ async def remove_market_alert_func(bot, interaction: discord.Interaction, pokemo
 
             if not exists:
                 await loader.error(
-                    content=f"No active alert found for **{pokemon_title}**."
+                    content=f"No active alert found for **{target_name}**."
                 )
                 return
 

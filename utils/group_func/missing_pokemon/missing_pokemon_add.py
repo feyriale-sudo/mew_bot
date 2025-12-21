@@ -7,7 +7,7 @@ from config.settings import CHECKLIST_SETTINGS_MAP, Channels
 from config.weakness_chart import weakness_chart
 from utils.db.missing_pokemon_db_func import upsert_missing_pokemon
 from utils.logs.pretty_log import pretty_log
-from utils.pokemeow.parsers import parse_special_mega_input, resolve_pokemon_input
+from utils.pokemeow.new_parsers import resolve_pokemon_input
 from utils.visuals.design_embed import design_embed
 from utils.visuals.pretty_defer import pretty_defer, pretty_error
 from utils.visuals.name_helpers import format_display_pokemon_name
@@ -38,32 +38,7 @@ async def missing_pokemon_add_func(
         return
 
     # 🌸 Resolve Pokémon input
-    pokemon_title = pokemon.title()
-
-    # 🌸 If input is just dex number
-    if pokemon.isdigit():
-        if len(pokemon) == 4 and not pokemon.startswith(("1", "7", "9")):
-            # 🌸 Return if input is 4 digit number and doesnt start with 1, 7 or 9
-            await loader.error(
-                content="Invalid Pokémon input. Please provide a valid name or Dex number."
-            )
-            return
-        target_name, dex_number = resolve_pokemon_input(pokemon)
-
-    # 🌸 If input is Mega Pokemon
-    elif any(
-        (
-            pokemon_title.startswith(f"{prefix}Mega ")
-            or pokemon_title.startswith(f"{prefix}Mega-")
-        )
-        for prefix in ["", "Shiny ", "Golden "]
-    ):
-        dex_number = parse_special_mega_input(pokemon)
-        target_name = pokemon_title
-
-    # 🌸 Else, resolve normally
-    else:
-        target_name, dex_number = resolve_pokemon_input(pokemon)
+    target_name, dex_number = resolve_pokemon_input(pokemon)
 
     # 🌸 Upsert missing pokemon entry
     channel_id = CHECKLIST_SETTINGS_MAP[user_id]["channel_id"]

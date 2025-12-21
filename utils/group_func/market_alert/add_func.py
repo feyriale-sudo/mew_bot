@@ -12,11 +12,13 @@ from config.aesthetic import *
 from config.settings import Channels
 from utils.group_func.market_alert.market_alert_db_func import insert_name_alert
 from utils.logs.pretty_log import pretty_log
-from utils.pokemeow.parsers import parse_special_mega_input, resolve_pokemon_input
-from utils.visuals.design_embed import design_embed
-from utils.visuals.pretty_defer import pretty_defer, pretty_error
 from utils.parsers.number_parser import parse_compact_number
+from utils.pokemeow.new_parsers import resolve_pokemon_input
+from utils.visuals.design_embed import design_embed
 from utils.visuals.name_helpers import format_display_pokemon_name
+from utils.visuals.pretty_defer import pretty_defer, pretty_error
+
+
 async def add_market_alert_func(
     bot,
     interaction: discord.Interaction,
@@ -73,7 +75,10 @@ async def add_market_alert_func(
     pokemon_title = pokemon.title()
 
     # Check pokemon input
-    pretty_log("info", f"Adding market alert for {user} - Pokemon: {pokemon}, Max Price: {max_price}")
+    pretty_log(
+        "info",
+        f"Adding market alert for {user} - Pokemon: {pokemon}, Max Price: {max_price}",
+    )
     # 🌸 Validate max price
     parse_price = parse_compact_number(max_price)
     if not parse_price:
@@ -84,27 +89,11 @@ async def add_market_alert_func(
     max_price = int(parse_price)
 
     try:
-        # 🔹 Step 1: Resolve Pokémon
-        await loader.edit(content="Resolving Pokémon...")
-        if pokemon.isdigit():
-            if len(pokemon) == 4 and not pokemon.startswith(("1", "7", "9")):
-                raise ValueError("Invalid 4-digit Dex number.")
-            target_name, dex_number = resolve_pokemon_input(pokemon)
-        elif any(
-            (
-                pokemon_title.startswith(f"{prefix}Mega ")
-                or pokemon_title.startswith(f"{prefix}Mega-")
-            )
-            for prefix in ["", "Shiny ", "Golden "]
-        ):
-            dex_number = parse_special_mega_input(pokemon)
-            target_name = pokemon_title
-        else:
-            target_name, dex_number = resolve_pokemon_input(pokemon)
+        # 🌸 Step 1: Resolve Pokémon input
 
-        if "mega" in target_name.lower():
-            target_name = target_name.replace("-", " ")
-        
+        await loader.edit(content="Resolving Pokémon...")
+        target_name, dex_number = resolve_pokemon_input(pokemon)
+
         # 🔹 Step 2: Validate max price
         await loader.edit(content="Validating max price...")
         max_price_int = int(max_price)
@@ -139,7 +128,10 @@ async def add_market_alert_func(
         await loader.edit(content="Finalizing...")
 
     except Exception as e:
-        pretty_log("critical", f"Market alert failed: {e}", )
+        pretty_log(
+            "critical",
+            f"Market alert failed: {e}",
+        )
         await loader.error(
             content=f"Market alert Add failed: {e}",
         )
@@ -210,6 +202,5 @@ async def add_market_alert_func(
         pretty_log(
             "error",
             f"Failed to send final embed: {e}",
-
             include_trace=True,
         )

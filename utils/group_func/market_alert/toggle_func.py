@@ -7,7 +7,7 @@ from utils.group_func.market_alert.market_alert_db_func import (
     toggle_market_alert_notify,
 )
 from utils.logs.pretty_log import pretty_log
-from utils.pokemeow.parsers import resolve_pokemon_input
+from utils.pokemeow.new_parsers import resolve_pokemon_input
 from utils.visuals.name_helpers import format_display_pokemon_name
 
 async def toggle_market_alert_func(
