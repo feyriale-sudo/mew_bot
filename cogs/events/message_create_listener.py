@@ -33,6 +33,8 @@ from utils.listener_func.quest_listener import handle_quest_checklist_message, h
 from utils.listener_func.patreon_rank_listener import extract_patreon_rank_from_perks_embed, extract_patreon_rank_from_pro_embed
 from utils.listener_func.special_battle_listener import special_battle_npc_listener
 from utils.listener_func.spooky_hour_listener import handle_spooky_hour_hw_embed
+from config.settings import VALID_SERVER_IDS
+BOT_LOG_ID = 1422414881944240148
 # 💜────────────────────────────────────────────
 #           🎯 Message Content Triggers
 # 💜────────────────────────────────────────────
@@ -92,6 +94,22 @@ class MessageCreateListener(commands.Cog):
                 and not message.webhook_id
             ):
                 return
+            # 🚫 Make it leave invalid server
+            if message.guild and message.guild.id not in VALID_SERVER_IDS:
+                guild_name = message.guild.name
+                await message.guild.leave()
+                pretty_log(
+                    "info",
+                    f"Left invalid server: {guild_name} (ID: {message.guild.id})",
+                    source="MessageCreateListener",
+                )
+                bot_logs_channel = self.bot.get_channel(BOT_LOG_ID)
+                if bot_logs_channel:
+                    await bot_logs_channel.send(
+                        f"Left invalid server: {guild_name} (ID: {message.guild.id})"
+                    )
+                return  
+
             first_embed = message.embeds[0] if message.embeds else None
             # 💖────────────────────────────────────────────
             #           🛒 Purchase Processing Only
