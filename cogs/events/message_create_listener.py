@@ -101,14 +101,13 @@ class MessageCreateListener(commands.Cog):
                 pretty_log(
                     "info",
                     f"Left invalid server: {guild_name} (ID: {message.guild.id})",
-                    source="MessageCreateListener",
                 )
                 bot_logs_channel = self.bot.get_channel(BOT_LOG_ID)
                 if bot_logs_channel:
                     await bot_logs_channel.send(
                         f"Left invalid server: {guild_name} (ID: {message.guild.id})"
                     )
-                return  
+                return
 
             first_embed = message.embeds[0] if message.embeds else None
             # 💖────────────────────────────────────────────
