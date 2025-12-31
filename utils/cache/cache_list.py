@@ -111,3 +111,13 @@ daily_faction_ball_cache: dict[str, str | None] = {}
 #     "skull": None,
 #     "yell": "Some Value or None"
 # }
+
+# 🌸──────────────────────────────────────────────
+#      🧸 Battle Tower Cache (Global) 🧸
+# ───────────────────────────────────────────────
+battle_tower_cache: dict[int, dict] = {}
+# Structure
+# user_id: {
+# "user_name": str,
+# "registered_at": int (timestamp)
+# }

@@ -9,7 +9,12 @@ import discord
 from discord.ext import commands
 
 from config.settings import *
+from config.settings import VALID_SERVER_IDS
 from utils.listener_func.battle_timer import battle_timer_handler
+from utils.listener_func.battle_tower_listener import (
+    bt_command_listener,
+    bt_register_listener,
+)
 from utils.listener_func.catchbot_listener import (
     handle_cb_checklist_message,
     handle_cb_command_embed,
@@ -17,23 +22,33 @@ from utils.listener_func.catchbot_listener import (
     handle_cb_run_message,
 )
 from utils.listener_func.dex_listener import dex_message_handler
+from utils.listener_func.faction_ball_listener import (
+    extract_faction_ball_from_daily,
+    extract_faction_ball_from_fa,
+)
+from utils.listener_func.faction_hunt_alert import faction_hunt_alert
 from utils.listener_func.fish_timer import fish_timer_handler
 from utils.listener_func.held_item_ping import held_item_ping
 from utils.listener_func.market_alert_listener import process_market_alert_message
 from utils.listener_func.market_purchase_listener import get_purchased_pokemon
 from utils.listener_func.multi_trade_listener import handle_multitrade_message
+from utils.listener_func.patreon_rank_listener import (
+    extract_patreon_rank_from_perks_embed,
+    extract_patreon_rank_from_pro_embed,
+)
 from utils.listener_func.pokemon_timer import pokemon_timer_handler
+from utils.listener_func.quest_listener import (
+    handle_quest_checklist_message,
+    handle_quest_complete_message,
+    handle_quest_embed,
+)
 from utils.listener_func.rarespawn.egg_hatch_rs import egg_rarespawn_handler
 from utils.listener_func.rarespawn.swap_rare_spawn import swap_rarespawn_handler
 from utils.listener_func.single_trade_listener import handle_single_trade_message
-from utils.logs.pretty_log import pretty_log
-from utils.listener_func.faction_ball_listener import extract_faction_ball_from_daily, extract_faction_ball_from_fa
-from utils.listener_func.faction_hunt_alert import faction_hunt_alert
-from utils.listener_func.quest_listener import handle_quest_checklist_message, handle_quest_complete_message, handle_quest_embed
-from utils.listener_func.patreon_rank_listener import extract_patreon_rank_from_perks_embed, extract_patreon_rank_from_pro_embed
 from utils.listener_func.special_battle_listener import special_battle_npc_listener
 from utils.listener_func.spooky_hour_listener import handle_spooky_hour_hw_embed
-from config.settings import VALID_SERVER_IDS
+from utils.logs.pretty_log import pretty_log
+
 BOT_LOG_ID = 1422414881944240148
 # 💜────────────────────────────────────────────
 #           🎯 Message Content Triggers
@@ -53,6 +68,11 @@ CATCHBOT_SPENT_PATTERN = re.compile(
 held_item_trigger = "<:held_item:"
 FACTIONS = ["aqua", "flare", "galactic", "magma", "plasma", "rocket", "skull", "yell"]
 hw_embed_trigger = "happy halloween pokemeow! participate in activities for rewards!"
+bt_register_triggers = [
+    "you have registered for the battle tower! start battling with `;battle npc battletower`",
+    "you have already registered in the current battle tower wave!"
+]
+
 
 # 💜────────────────────────────────────────────
 #           🧩 Message Create Listener Cog
@@ -110,6 +130,10 @@ class MessageCreateListener(commands.Cog):
                 return
 
             first_embed = message.embeds[0] if message.embeds else None
+            first_embed_description = first_embed.description if first_embed else None
+            first_embed_author = (
+                first_embed.author.name if first_embed and first_embed.author else ""
+            )
             # 💖────────────────────────────────────────────
             #           🛒 Purchase Processing Only
             # 💖────────────────────────────────────────────
@@ -200,6 +224,7 @@ class MessageCreateListener(commands.Cog):
             # 💜────────────────────────────────────────────
             #           ⚔️ Battle Timer Processing Only
             # 💜────────────────────────────────────────────
+
             if message.embeds and message.embeds[0]:
                 await battle_timer_handler(self.bot, message)
 
@@ -218,19 +243,28 @@ class MessageCreateListener(commands.Cog):
             # 💜────────────────────────────────────────────
             # A. From ;fa command
             if first_embed:
-                if first_embed.author and any(f in first_embed.author.name.lower() for f in FACTIONS):
+                if first_embed.author and any(
+                    f in first_embed.author.name.lower() for f in FACTIONS
+                ):
                     await extract_faction_ball_from_fa(self.bot, message)
 
             # B. From daily message
             if first_embed:
-                if first_embed.description and "daily streak" in first_embed.description.lower():
+                if (
+                    first_embed.description
+                    and "daily streak" in first_embed.description.lower()
+                ):
                     await extract_faction_ball_from_daily(self.bot, message)
 
             # 💜────────────────────────────────────────────
             #        🎈 Faction Ball Alert Processing Only
             # 💜────────────────────────────────────────────
             if first_embed:
-                if first_embed.description and "<:team_logo:" in first_embed.description and "found a wild" in first_embed.description:
+                if (
+                    first_embed.description
+                    and "<:team_logo:" in first_embed.description
+                    and "found a wild" in first_embed.description
+                ):
                     await faction_hunt_alert(self.bot, before=message, after=message)
 
             # 💜────────────────────────────────────────────
@@ -262,9 +296,48 @@ class MessageCreateListener(commands.Cog):
             # 💜────────────────────────────────────────────
             #        📝 Quest Complete Processing Only
             # 💜────────────────────────────────────────────
-            if message.content and ":notepad_spiral" in message.content and "completed the quest" in message.content:
+            if (
+                message.content
+                and ":notepad_spiral" in message.content
+                and "completed the quest" in message.content
+            ):
                 await handle_quest_complete_message(self.bot, message)
 
+            # 💜────────────────────────────────────────────
+            #        🏰 Battle Tower Registration Processing Only
+            # 💜────────────────────────────────────────────
+            if message.content:
+                content_lower = message.content.lower()
+                # BT Register
+                if any(trigger in content_lower for trigger in bt_register_triggers):
+                    pretty_log(
+                        "info",
+                        f"Matched Battle Tower registration trigger in ;bt register | Message ID: {message.id} | Channel: {message.channel.name}",
+                    )
+                    await bt_register_listener(self.bot, message)
+            # 💜────────────────────────────────────────────
+            #        🏰 ; B npc bt command listener
+            # 💜────────────────────────────────────────────
+            if first_embed:
+                if (
+                    first_embed.description
+                    and "challenged <:battletower" in first_embed.description
+                ):
+                    pretty_log(
+                        "info",
+                        f"Matched Battle Tower NPC battle trigger in ;b npc bt | Message ID: {message.id} | Channel: {message.channel.name}",
+                    )
+                    await bt_register_listener(self.bot, message)
+            # 💜────────────────────────────────────────────
+            #        🏰 Battle Tower Command Listener
+            # 💜────────────────────────────────────────────
+            if first_embed and first_embed_author:
+                if "PokeMeow Battle Tower" in first_embed_author:
+                    pretty_log(
+                        "info",
+                        f"Matched Battle Tower command trigger | Message ID: {message.id} | Channel: {message.channel.name}",
+                    )
+                    await bt_command_listener(self.bot, message)
             # 💜────────────────────────────────────────────
             #        💎 Patreon Rank Processing Only
             # 💜────────────────────────────────────────────
@@ -328,7 +401,9 @@ class MessageCreateListener(commands.Cog):
                             f"Matched CatchBot and quest checklist trigger in embed footer: {footer_text}",
                         )
                         await handle_cb_checklist_message(bot=self.bot, message=message)
-                        await handle_quest_checklist_message(bot=self.bot, message=message)
+                        await handle_quest_checklist_message(
+                            bot=self.bot, message=message
+                        )
         except Exception as e:
             pretty_log(
                 "critical",

@@ -1,5 +1,6 @@
 import discord
 
+
 # ❀─────────────────────────────────────────❀
 #      💖  Get Pokemeow Reply
 # ❀─────────────────────────────────────────❀
@@ -26,3 +27,16 @@ async def get_pokemeow_reply_member(message: discord.Message) -> discord.Member 
         resolved_msg.author if isinstance(resolved_msg.author, discord.Member) else None
     )
     return member
+
+
+async def get_command_user(interaction: discord.Interaction) -> discord.Member | None:
+    """
+    Returns the member object of the user who invoked the slash command.
+    """
+    if hasattr(interaction, "user") and isinstance(interaction.user, discord.Member):
+        return interaction.user
+    if hasattr(interaction, "author") and isinstance(
+        interaction.author, discord.Member
+    ):
+        return interaction.author
+    return None
