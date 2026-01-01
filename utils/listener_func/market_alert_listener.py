@@ -260,7 +260,7 @@ async def process_market_alert_message(
             target_channel_id = missing_entry["channel_id"]
 
         # 🧾 Build embed
-        desc = f"`;m b {original_id}`"
+        desc = f";m b {original_id}"
         new_embed = discord.Embed(
             title="Buy Command", color=embed.color or 0x0855FB, description=desc
         )
