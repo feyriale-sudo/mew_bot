@@ -303,7 +303,7 @@ class MessageCreateListener(commands.Cog):
             ):
                 await handle_quest_complete_message(self.bot, message)
 
-            # 💜────────────────────────────────────────────
+            """# 💜────────────────────────────────────────────
             #        🏰 Battle Tower Registration Processing Only
             # 💜────────────────────────────────────────────
             if message.content:
@@ -337,7 +337,7 @@ class MessageCreateListener(commands.Cog):
                         "info",
                         f"Matched Battle Tower command trigger | Message ID: {message.id} | Channel: {message.channel.name}",
                     )
-                    await bt_command_listener(self.bot, message)
+                    await bt_command_listener(self.bot, message)"""
             # 💜────────────────────────────────────────────
             #        💎 Patreon Rank Processing Only
             # 💜────────────────────────────────────────────

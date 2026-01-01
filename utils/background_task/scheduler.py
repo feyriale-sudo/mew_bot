@@ -51,7 +51,7 @@ async def setup_scheduler(bot):
         bot=bot,
     )
 
-    # Battle Tower Reset Reminder at 8:05 PM EST Every Monday , Wednesday, Friday
+    """# Battle Tower Reset Reminder at 8:05 PM EST Every Monday , Wednesday, Friday
     scheduler_manager.add_cron_job(
         battle_tower_reset_reminder,
         name="battle_tower_reset_reminder",
@@ -82,7 +82,7 @@ async def setup_scheduler(bot):
         message="Scheduled clearing of Battle Tower reminders on Mon, Wed, Fri at 9:05 PM EST.",
         bot=bot,
     )
-
+"""
     # Start the scheduler
     scheduler_manager.start()
 
