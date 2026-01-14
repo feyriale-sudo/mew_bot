@@ -10,6 +10,7 @@ from discord.ext import commands
 
 from config.settings import *
 from config.settings import VALID_SERVER_IDS
+from utils.listener_func.battle_icon_unlock import battle_unlock_listener
 from utils.listener_func.battle_timer import battle_timer_handler
 from utils.listener_func.battle_tower_listener import (
     bt_command_listener,
@@ -28,6 +29,7 @@ from utils.listener_func.faction_ball_listener import (
 )
 from utils.listener_func.faction_hunt_alert import faction_hunt_alert
 from utils.listener_func.fish_timer import fish_timer_handler
+from utils.listener_func.golden_stone_listener import golden_stone_listener
 from utils.listener_func.held_item_ping import held_item_ping
 from utils.listener_func.market_alert_listener import process_market_alert_message
 from utils.listener_func.market_purchase_listener import get_purchased_pokemon
@@ -70,8 +72,10 @@ FACTIONS = ["aqua", "flare", "galactic", "magma", "plasma", "rocket", "skull", "
 hw_embed_trigger = "happy halloween pokemeow! participate in activities for rewards!"
 bt_register_triggers = [
     "you have registered for the battle tower! start battling with `;battle npc battletower`",
-    "you have already registered in the current battle tower wave!"
+    "you have already registered in the current battle tower wave!",
 ]
+golden_stone_triggers = ["You have completed the", "Mega", "to claim your <:golden_"]
+battle_icon_triggers = ["You have unlocked", "trainer icon!"]
 
 
 # 💜────────────────────────────────────────────
@@ -255,7 +259,28 @@ class MessageCreateListener(commands.Cog):
                     and "daily streak" in first_embed.description.lower()
                 ):
                     await extract_faction_ball_from_daily(self.bot, message)
-
+            # 💜────────────────────────────────────────────
+            #        💎 Golden Stone Mega Chamber Processing Only
+            # 💜────────────────────────────────────────────
+            if message.content and all(
+                trigger in message.content for trigger in golden_stone_triggers
+            ):
+                pretty_log(
+                    "info",
+                    f"Matched Golden Stone Mega Chamber triggers | Message ID: {message.id} | Channel: {message.channel.name}",
+                )
+                await golden_stone_listener(message)
+            # 💜────────────────────────────────────────────
+            #        🖼️ Battle Icon Unlock Processing Only
+            # 💜────────────────────────────────────────────
+            if message.content and all(
+                trigger in message.content for trigger in battle_icon_triggers
+            ):
+                pretty_log(
+                    "info",
+                    f"Matched Battle Icon Unlock triggers | Message ID: {message.id} | Channel: {message.channel.name}",
+                )
+                await battle_unlock_listener(message)
             # 💜────────────────────────────────────────────
             #        🎈 Faction Ball Alert Processing Only
             # 💜────────────────────────────────────────────
