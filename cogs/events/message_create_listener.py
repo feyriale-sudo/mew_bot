@@ -293,7 +293,7 @@ class MessageCreateListener(commands.Cog):
                     and "found a wild" in first_embed.description
                 ):
                     await faction_hunt_alert(self.bot, before=message, after=message)
-
+                #
             # 💜────────────────────────────────────────────
             #        📦 TCG Inventory Embed Processing Only
             # 💜────────────────────────────────────────────
