@@ -49,6 +49,7 @@ from utils.listener_func.rarespawn.swap_rare_spawn import swap_rarespawn_handler
 from utils.listener_func.single_trade_listener import handle_single_trade_message
 from utils.listener_func.special_battle_listener import special_battle_npc_listener
 from utils.listener_func.spooky_hour_listener import handle_spooky_hour_hw_embed
+from utils.listener_func.tcg_inv import parse_tcg_inventory_embed
 from utils.logs.pretty_log import pretty_log
 
 BOT_LOG_ID = 1422414881944240148
@@ -138,6 +139,7 @@ class MessageCreateListener(commands.Cog):
             first_embed_author = (
                 first_embed.author.name if first_embed and first_embed.author else ""
             )
+            first_embed_title = first_embed.title if first_embed else ""
             # 💖────────────────────────────────────────────
             #           🛒 Purchase Processing Only
             # 💖────────────────────────────────────────────
@@ -292,6 +294,14 @@ class MessageCreateListener(commands.Cog):
                 ):
                     await faction_hunt_alert(self.bot, before=message, after=message)
 
+            # 💜────────────────────────────────────────────
+            #        📦 TCG Inventory Embed Processing Only
+            # 💜────────────────────────────────────────────
+            if first_embed:
+                if "tcg inventory" in first_embed_title.lower():
+                    await parse_tcg_inventory_embed(
+                        message=message,
+                    )
             # 💜────────────────────────────────────────────
             #        ⏰ Special Battle NPC Timer Processing Only (Disabled for now)
             # 💜────────────────────────────────────────────

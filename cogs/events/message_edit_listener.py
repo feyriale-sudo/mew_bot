@@ -10,13 +10,16 @@ from discord.ext import commands
 from config.settings import *
 from utils.listener_func.faction_hunt_alert import faction_hunt_alert
 from utils.listener_func.fish_rarity_embed import fish_rarity_embed
+from utils.listener_func.quest_listener import handle_quest_complete_message
 from utils.listener_func.rarespawn.catch_and_fish import (
     catch_and_fish_message_rare_spawn_handler,
 )
+from utils.listener_func.tcg_inv import parse_tcg_inventory_embed
 from utils.logs.pretty_log import pretty_log
-from utils.listener_func.quest_listener import handle_quest_complete_message
+
 RARE_SPAWN_TRIGGERS = ["You caught a", "broke out of the", "ran away"]
 FISHING_COLOR = 0x87CEFA
+
 
 class MessageEditListener(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -61,6 +64,7 @@ class MessageEditListener(commands.Cog):
 
             embed = after.embeds[0]
             embed_desc = embed.description if embed else ""
+            embed_title = embed.title if embed else ""
 
             # 💜────────────────────────────────────────────
             #     🎣  Fish Rarity Embed Handler
@@ -111,6 +115,15 @@ class MessageEditListener(commands.Cog):
                 tag="critical",
                 message=f"Unhandled exception in on_message_edit: {e}",
             )
+            # 💜────────────────────────────────────────────
+            #        🟣 TCG Inventory Embed Parser
+            # 💜────────────────────────────────────────────
+            if after.embeds:
+                first_embed_title = after.embeds[0].title or ""
+                if "tcg inventory" in first_embed_title.lower():
+                    await parse_tcg_inventory_embed(
+                        message=after,
+                    )
 
 
 # 💜────────────────────────────────────────────
