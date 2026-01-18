@@ -102,6 +102,21 @@ class MessageEditListener(commands.Cog):
                     )
                     await faction_hunt_alert(bot=self.bot, before=before, after=after)
             # 💜────────────────────────────────────────────
+            #        🟣 TCG Inventory Embed Parser
+            # 💜────────────────────────────────────────────
+            if after.embeds:
+                first_embed_title = after.embeds[0].title or ""
+                if "tcg inventory" in first_embed_title.lower():
+                    pretty_log(
+                        "info",
+                        f"Detected TCG Inventory Embed Edit",
+                        label="🃏 TCG INVENTORY EDIT",
+                        bot=self.bot,
+                    )
+                    await parse_tcg_inventory_embed(
+                        message=after,
+                    )
+            # 💜────────────────────────────────────────────
             #        📝 Quest Complete Processing Only
             # 💜────────────────────────────────────────────
             if (
@@ -115,15 +130,6 @@ class MessageEditListener(commands.Cog):
                 tag="critical",
                 message=f"Unhandled exception in on_message_edit: {e}",
             )
-            # 💜────────────────────────────────────────────
-            #        🟣 TCG Inventory Embed Parser
-            # 💜────────────────────────────────────────────
-            if after.embeds:
-                first_embed_title = after.embeds[0].title or ""
-                if "tcg inventory" in first_embed_title.lower():
-                    await parse_tcg_inventory_embed(
-                        message=after,
-                    )
 
 
 # 💜────────────────────────────────────────────
