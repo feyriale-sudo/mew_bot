@@ -106,7 +106,7 @@ class MessageEditListener(commands.Cog):
             # 💜────────────────────────────────────────────
             if after.embeds:
                 first_embed_title = after.embeds[0].title or ""
-                if "tcg inventory" in first_embed_title.lower():
+                if first_embed_title and "tcg inventory" in first_embed_title.lower():
                     pretty_log(
                         "info",
                         f"Detected TCG Inventory Embed Edit",

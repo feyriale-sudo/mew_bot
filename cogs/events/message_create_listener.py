@@ -298,7 +298,7 @@ class MessageCreateListener(commands.Cog):
             #        📦 TCG Inventory Embed Processing Only
             # 💜────────────────────────────────────────────
             if first_embed:
-                if "tcg inventory" in first_embed_title.lower():
+                if first_embed_title and "tcg inventory" in first_embed_title.lower():
                     await parse_tcg_inventory_embed(
                         message=message,
                     )
