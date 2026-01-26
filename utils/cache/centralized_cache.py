@@ -3,8 +3,10 @@
 #       🎀 Calls all individual caches 🎀
 # 💜────────────────────────────────────────────
 
+from utils.cache.auction_reminder_cache import load_auction_reminder_cache
 from utils.cache.battle_tower_cache import load_battle_tower_cache
 from utils.cache.cache_list import (
+    auction_reminder_cache,
     battle_tower_cache,
     daily_faction_ball_cache,
     market_alert_cache,
@@ -62,6 +64,9 @@ async def load_all_caches(bot):
         # 🌸 Load Battle Tower Cache
         await load_battle_tower_cache(bot)
 
+        # 🌸 Load Auction Reminder Cache
+        await load_auction_reminder_cache(bot)
+
         # 🎀 Unified summary log
         pretty_log(
             tag="",
@@ -76,6 +81,7 @@ async def load_all_caches(bot):
                 f"User Info: {len(user_info_cache)} ~{get_deep_size(user_info_cache)//1024} KB + "
                 f"Daily Faction Balls: {len(daily_faction_ball_cache)} ~{get_deep_size(daily_faction_ball_cache)//1024} KB + "
                 f"Battle Tower Users: {len(battle_tower_cache)} ~{get_deep_size(battle_tower_cache)//1024} KB + "
+                f"Auction Reminders: {len(auction_reminder_cache)} ~{get_deep_size(auction_reminder_cache)//1024} KB + "
                 f"Market Values: {len(market_value_cache)} ~{get_deep_size(market_value_cache)//1024} KB = "
                 f"Total Approx: ~{(get_deep_size(market_alert_cache) + get_deep_size(missing_pokemon_cache) + get_deep_size(timer_cache) + get_deep_size(schedule_cache) + get_deep_size(utility_cache) + get_deep_size(user_info_cache) + get_deep_size(daily_faction_ball_cache) + get_deep_size(market_value_cache))//1024} KB"
             ),

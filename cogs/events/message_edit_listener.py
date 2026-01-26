@@ -8,6 +8,7 @@ import discord
 from discord.ext import commands
 
 from config.settings import *
+from utils.listener_func.auction_command_listener import auction_command_listener
 from utils.listener_func.faction_hunt_alert import faction_hunt_alert
 from utils.listener_func.fish_rarity_embed import fish_rarity_embed
 from utils.listener_func.quest_listener import handle_quest_complete_message
@@ -17,6 +18,7 @@ from utils.listener_func.rarespawn.catch_and_fish import (
 from utils.listener_func.tcg_inv import parse_tcg_inventory_embed
 from utils.logs.pretty_log import pretty_log
 
+auction_command_trigger = "Auctions on this page"
 RARE_SPAWN_TRIGGERS = ["You caught a", "broke out of the", "ran away"]
 FISHING_COLOR = 0x87CEFA
 
@@ -65,6 +67,9 @@ class MessageEditListener(commands.Cog):
             embed = after.embeds[0]
             embed_desc = embed.description if embed else ""
             embed_title = embed.title if embed else ""
+            embed_footer_text = (
+                embed.footer.text if embed.footer and embed.footer.text else ""
+            )
 
             # 💜────────────────────────────────────────────
             #     🎣  Fish Rarity Embed Handler
@@ -116,6 +121,21 @@ class MessageEditListener(commands.Cog):
                     await parse_tcg_inventory_embed(
                         message=after,
                     )
+            # 💜────────────────────────────────────────────
+            #        🟣 Auction Command Listener
+            # 💜────────────────────────────────────────────
+            if after.embeds:
+                if (
+                    after.embeds[0].footer
+                    and auction_command_trigger in after.embeds[0].footer.text
+                ):
+                    pretty_log(
+                        "info",
+                        f"Detected Auction Command Embed Edit",
+                        label="🏷️ AUCTION COMMAND EDIT",
+                        bot=self.bot,
+                    )
+                    await auction_command_listener(self.bot, before, after)
             # 💜────────────────────────────────────────────
             #        📝 Quest Complete Processing Only
             # 💜────────────────────────────────────────────

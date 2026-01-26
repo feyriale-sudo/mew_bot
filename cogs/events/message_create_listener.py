@@ -10,6 +10,7 @@ from discord.ext import commands
 
 from config.settings import *
 from config.settings import VALID_SERVER_IDS
+from utils.listener_func.auction_command_listener import auction_command_listener
 from utils.listener_func.battle_icon_unlock import battle_unlock_listener
 from utils.listener_func.battle_timer import battle_timer_handler
 from utils.listener_func.battle_tower_listener import (
@@ -77,6 +78,7 @@ bt_register_triggers = [
 ]
 golden_stone_triggers = ["You have completed the", "Mega", "to claim your <:golden_"]
 battle_icon_triggers = ["You have unlocked", "trainer icon!"]
+auction_command_trigger = "Auctions on this page"
 
 
 # 💜────────────────────────────────────────────
@@ -140,6 +142,9 @@ class MessageCreateListener(commands.Cog):
                 first_embed.author.name if first_embed and first_embed.author else ""
             )
             first_embed_title = first_embed.title if first_embed else ""
+            first_embed_footer = (
+                first_embed.footer.text if first_embed and first_embed.footer else ""
+            )
             # 💖────────────────────────────────────────────
             #           🛒 Purchase Processing Only
             # 💖────────────────────────────────────────────
@@ -302,6 +307,24 @@ class MessageCreateListener(commands.Cog):
                     await parse_tcg_inventory_embed(
                         message=message,
                     )
+            # 💜────────────────────────────────────────────
+            #        ⏰ Auction Command Listener Processing Only
+            # 💜────────────────────────────────────────────
+            if first_embed:
+                if (
+                    first_embed.footer
+                    and auction_command_trigger in first_embed.footer.text
+                ):
+                    pretty_log(
+                        "info",
+                        f"Matched Auction Command trigger | Message ID: {message.id} | Channel: {message.channel.name}",
+                    )
+                    await auction_command_listener(
+                        bot=self.bot,
+                        before_message=message,
+                        message=message,
+                    )
+
             # 💜────────────────────────────────────────────
             #        ⏰ Special Battle NPC Timer Processing Only (Disabled for now)
             # 💜────────────────────────────────────────────
