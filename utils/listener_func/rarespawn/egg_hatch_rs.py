@@ -6,7 +6,7 @@ from config.rarity import *
 from config.settings import Channels, Roles, users, MAIN_SERVER_ID
 from utils.logs.pretty_log import pretty_log
 from utils.pokemeow.get_pokemeow_reply import get_pokemeow_reply_member
-
+from utils.cache.processed_msg_ids import processed_egg_hatches
 from .catch_and_fish import build_rare_spawn_embed
 
 RARE_EGG_EXCLUSIVES = [
@@ -40,7 +40,7 @@ valid_user_ids = [
     users.skaia,
     users.night,
 ]
-processed_egg_hatches = set()
+
 # ❀─────────────────────────────────────────❀
 #      💖  Egg Hatch Listener
 # ❀─────────────────────────────────────────❀

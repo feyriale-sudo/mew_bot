@@ -6,6 +6,7 @@ from config.aesthetic import Emojis
 from config.rarity import *
 from config.settings import MAIN_SERVER_ID, Channels, Roles, users
 from utils.cache.cache_list import market_value_cache
+from utils.cache.processed_msg_ids import processed_catch_and_fish_msgs
 from utils.logs.debug_logs import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
 from utils.pokemeow.get_pokemeow_reply import get_pokemeow_reply_member
@@ -20,7 +21,6 @@ TEST_RS_CHANNEL_ID = 1128425613447929859
 
 valid_user_ids = [users.skaia, users.night]
 rare_rarity = ["legendary", "shiny"]
-processed_catch_and_fish_msgs = set()
 
 
 # ❀─────────────────────────────────────────❀
@@ -107,8 +107,6 @@ async def catch_and_fish_message_rare_spawn_handler(
     skaia_server = bot.get_guild(MAIN_SERVER_ID)
     spawn_type = "pokemon" if embed_color != FISHING_COLOR else "fish"
     debug_log(f"Spawn type determined: {spawn_type}")
-
-
 
     # Determine context and extract Pokemon name
     pokemon_name = ""

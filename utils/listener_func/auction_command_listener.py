@@ -5,6 +5,7 @@ import discord
 from discord.ui import Button, View
 
 from utils.cache.cache_list import auction_reminder_cache
+from utils.cache.processed_msg_ids import processed_auction_prompts
 from utils.db.auction_reminder_db import (
     delete_all_auction_reminders,
     update_auction_reminder_alarm,
@@ -13,8 +14,19 @@ from utils.db.auction_reminder_db import (
 from utils.logs.pretty_log import pretty_log
 from utils.pokemeow.get_pokemeow_reply import get_pokemeow_reply_member
 
+# Track processed (ends_on, message_id) pairs in memory
+
 
 # Put in on message listener later
+# Put in on message listener later
+def should_send_prompt(ends_on, message_id):
+    key = (ends_on, message_id)
+    if key in processed_auction_prompts:
+        return False
+    processed_auction_prompts.add(key)
+    return True
+
+
 class Reminders_Buttons(View):
     def __init__(self, bot, member: discord.Member, ends_on: int):
         super().__init__(timeout=300)  # 5 minutes timeout
@@ -177,6 +189,9 @@ async def process_auction_timestamps(
     )
 
     for ends_on in timestamp_list:
+        # Only send prompt if this (ends_on, message.id) hasn't been processed
+        if not should_send_prompt(ends_on, message.id):
+            continue
         key = (ends_on, member.id)
         # Check if already in cache
         if key not in auction_reminder_cache:
@@ -188,6 +203,7 @@ async def process_auction_timestamps(
                 bot, ends_on, member.id, member.name, alarm_set=False
             )
             await send_reminder_prompt_embed(bot, member, message.channel, ends_on)
+
         else:
             # Check if alarm_set is False and update if necessary
             reminder = auction_reminder_cache[key]
