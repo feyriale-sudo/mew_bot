@@ -125,6 +125,11 @@ battle_tower_cache: dict[int, dict] = {}
 # 🌸──────────────────────────────────────────────
 #      Auction Reminder Cache (Global) 🕰
 # ───────────────────────────────────────────────
-auction_reminder_cache: dict[int, bool] = {}
+auction_reminder_cache: dict[tuple[int, int], dict] = {}
 # Structure
-# ends_on (int timestamp): alarm_set (bool)
+# (ends_on (int timestamp), user_id (int)): {
+#     "ends_on": int,
+#     "user_id": int,
+#     "user_name": str,
+#     "alarm_set": bool
+# }
