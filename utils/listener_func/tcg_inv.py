@@ -98,8 +98,8 @@ async def parse_tcg_inventory_embed(
                     _tcg_pack_cache[category] = []
                 _tcg_pack_cache[category].append(pack_id)
 
-    # Only reply if all pages have been seen
-    if len(_tcg_pages_seen) == total_pages:
+    # Only reply if all pages have been seen, or if there is only one page
+    if len(_tcg_pages_seen) == total_pages or total_pages == 1:
         member = member_obj
         display_name = getattr(member, "display_name", None) or user_mention or "User"
         pretty_log(tag="debug", message=f"All pages seen. Preparing embed commands.")
