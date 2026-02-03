@@ -261,6 +261,10 @@ async def process_market_alert_message(
 
         # 🧾 Build embed
         desc = f";m b {original_id}"
+        if has_market:
+            desc = f";m b {original_id} all"
+        else:
+            desc = f";m b {original_id}"
         new_embed = discord.Embed(
             title="Buy Command", color=embed.color or 0x0855FB, description=desc
         )
