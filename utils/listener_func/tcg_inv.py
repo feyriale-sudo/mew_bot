@@ -3,7 +3,10 @@ import typing
 
 import discord
 
+from utils.logs.debug_logs import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
+
+#enable_debug(f"{__name__}.parse_tcg_inventory_embed")
 
 
 async def extract_username_and_fetch_member(
@@ -30,6 +33,7 @@ async def extract_username_and_fetch_member(
 
 _tcg_pack_cache = {}
 _tcg_pages_seen = set()
+_tcg_processed_message_ids = set()
 member_obj = None
 
 
@@ -42,12 +46,15 @@ async def parse_tcg_inventory_embed(
     Sends all commands after all pages are processed.
     """
     global _tcg_pack_cache, _tcg_pages_seen, member_obj
-    pretty_log(
-        tag="debug",
-        message=f"parse_tcg_inventory_embed called for message ID: {getattr(message, 'id', None)}",
-    )
+    debug_log("Entered parse_tcg_inventory_embed()")
+    msg_id = getattr(message, "id", None)
+    debug_log(f"parse_tcg_inventory_embed called for message ID: {msg_id}")
+    # Prevent duplicate sends for the same message
+    if msg_id is not None and msg_id in _tcg_processed_message_ids:
+        debug_log(f"Message ID {msg_id} already processed. Skipping.")
+        return None
     if not message or not hasattr(message, "embeds") or not message.embeds:
-        pretty_log(tag="debug", message="No embeds found in message.")
+        debug_log("No embeds found in message.")
         return None
 
     embed = message.embeds[0]
@@ -61,50 +68,66 @@ async def parse_tcg_inventory_embed(
     # Extract page number from footer (e.g., 'Page 1 / 4')
     page_match = re.search(r"Page (\d+) / (\d+)", footer)
     if not page_match:
-        pretty_log(tag="debug", message="No page info found in footer.")
+        debug_log("No page info found in footer.")
         return None
     page_num = int(page_match.group(1))
     total_pages = int(page_match.group(2))
     if page_num == 1:
+        debug_log("Page 1 detected, clearing caches.")
+        _tcg_pack_cache.clear()
+        _tcg_pages_seen.clear()
         member = await extract_username_and_fetch_member(
             guild=message.guild, title=embed_title
         )
         if member:
             member_obj = member
-            pretty_log(
-                tag="debug",
-                message=f"Set member_obj to {getattr(member, 'display_name', None)} for user mention {user_mention}.",
+            debug_log(
+                f"Set member_obj to {getattr(member, 'display_name', None)} for user mention {user_mention}."
             )
 
     _tcg_pages_seen.add(page_num)
-    pretty_log(
-        tag="debug",
-        message=f"Page {page_num} detected. Pages seen: {_tcg_pages_seen} / {total_pages}",
+    debug_log(
+        f"Page {page_num} detected. Pages seen: {_tcg_pages_seen} / {total_pages}"
     )
 
     # Extract lines with pack info (lines starting with a number and a pack code)
     lines = [l for l in desc.split("\n") if re.match(r"\s*\d+\. ", l)]
+    debug_log(f"Found {len(lines)} lines with pack info on this page.")
+    parsed_pack_ids = []
+    skipped_lines = []
     for line in lines:
-        # Example line:
-        # 1. <:aq_logo:...> <:aq_pack_c:...> `aq-pack-4122` Aquapolis Pack ...
-        pack_id_match = re.search(r"`([a-z]+-pack-\d+)`", line)
+        # Only log skipped lines, not every line
+        pack_id_match = re.search(r"`([a-z0-9]+-pack-\d+)`", line)
         if pack_id_match:
             pack_id = pack_id_match.group(1)
-            # Category is the prefix, e.g., aq-pack
-            cat_match = re.match(r"([a-z]+-pack)", pack_id)
+            parsed_pack_ids.append(pack_id)
+            # Category is the prefix, e.g., aq-pack, ng1-pack, etc.
+            cat_match = re.match(r"([a-z0-9]+-pack)", pack_id)
             if cat_match:
                 category = cat_match.group(1)
                 if category not in _tcg_pack_cache:
                     _tcg_pack_cache[category] = []
                 _tcg_pack_cache[category].append(pack_id)
+        else:
+            skipped_lines.append(line)
 
     # Only reply if all pages have been seen, or if there is only one page
+    # Only print summary when all pages are seen or only one page
     if len(_tcg_pages_seen) == total_pages or total_pages == 1:
+        debug_log(f"SUMMARY: Parsed {len(parsed_pack_ids)} pack IDs: {parsed_pack_ids}")
+        if skipped_lines:
+            debug_log(f"SUMMARY: Skipped {len(skipped_lines)} lines: {skipped_lines}")
         member = member_obj
         display_name = getattr(member, "display_name", None) or user_mention or "User"
-        pretty_log(tag="debug", message=f"All pages seen. Preparing embed commands.")
+        debug_log(
+            f"All pages seen. Preparing embed commands. Pack cache: {_tcg_pack_cache}"
+        )
+
         fields = []
+        total_packs = sum(len(pack_ids) for pack_ids in _tcg_pack_cache.values())
+        embed_title_fmt = f"{display_name}'s TCG Gift Commands ({total_packs})"
         for category, pack_ids in _tcg_pack_cache.items():
+            debug_log(f"Category {category} has {len(pack_ids)} packs: {pack_ids}")
             # Batch in groups of 20
             for i in range(0, len(pack_ids), 20):
                 batch = pack_ids[i : i + 20]
@@ -118,6 +141,7 @@ async def parse_tcg_inventory_embed(
                     cmd += " " + " ".join(rest)
                 field_name = f"{category} ({len(batch)})"
                 fields.append({"name": field_name, "value": cmd, "inline": False})
+                debug_log(f"Prepared field: {field_name} with command: {cmd}")
 
         # Discord embed limits: 25 fields per embed, 6000 chars per embed
         embeds = []
@@ -128,7 +152,7 @@ async def parse_tcg_inventory_embed(
             # If adding this field would exceed limits, start a new embed
             if len(current_fields) >= 25 or current_length + field_length > 5900:
                 embed = discord.Embed(
-                    title=f"{display_name}'s TCG Gift Commands",
+                    title=embed_title_fmt,
                     color=embed_color,
                 )
                 for f in current_fields:
@@ -136,23 +160,29 @@ async def parse_tcg_inventory_embed(
                         name=f["name"], value=f["value"], inline=f["inline"]
                     )
                 embeds.append(embed)
+                debug_log(f"Embed created with {len(current_fields)} fields.")
                 current_fields = []
                 current_length = 0
             current_fields.append(field)
             current_length += field_length
         # Add the last embed if any fields remain
         if current_fields:
-            embed = discord.Embed(
-                title=f"{display_name}'s TCG Gift Commands", color=embed_color
-            )
+            embed = discord.Embed(title=embed_title_fmt, color=embed_color)
             for f in current_fields:
                 embed.add_field(name=f["name"], value=f["value"], inline=f["inline"])
             embeds.append(embed)
+            debug_log(f"Final embed created with {len(current_fields)} fields.")
 
         # Send all embeds in a single message if possible, else send in batches
         # discord.py: message.reply(embeds=[...]) supports up to 10 embeds per message
         for i in range(0, len(embeds), 10):
             await message.reply(embeds=embeds[i : i + 10])
+            debug_log(f"Sent embeds {i} to {i+10} (total: {len(embeds)})")
+
+        # Mark this message as processed to prevent duplicate sends
+        if msg_id is not None:
+            _tcg_processed_message_ids.add(msg_id)
+            debug_log(f"Marked message ID {msg_id} as processed.")
 
         _tcg_pack_cache.clear()
         _tcg_pages_seen.clear()
@@ -160,8 +190,5 @@ async def parse_tcg_inventory_embed(
         member_obj = None
 
     else:
-        pretty_log(
-            tag="debug",
-            message=f"Waiting for more pages. Current cache: {_tcg_pack_cache}",
-        )
+        debug_log(f"Waiting for more pages. Current cache: {_tcg_pack_cache}")
     return None

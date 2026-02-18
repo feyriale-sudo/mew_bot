@@ -172,16 +172,8 @@ async def startup_tasks():
         refresh_all_caches.start()
 
     # ❀ Start status rotator if not running ❀
-    if not status_rotator.is_running():
-        status_rotator.start()
-    activity_type, message = pick_status_tuple()
     await bot.change_presence(
-        activity=discord.Activity(type=activity_type, name=message)
-    )
-    pretty_log(
-        tag="",
-        message=f"Initial presence set: {activity_type} {message}",
-        label="👒 Status Rotator",
+        activity=discord.Activity(type=discord.ActivityType.playing, name="🩷 Playing with Skaia")
     )
 
     # ❀ Run startup checklist ❀
@@ -214,7 +206,6 @@ async def startup_checklist(bot: commands.Bot):
     print(f"✅ {len(utility_cache)} 👚 Utility Settings Loaded")
     print(f"✅ {len(user_info_cache)} 🩰 User Info Loaded")
     print(f"✅ {len(daily_faction_ball_cache)} 🎈 Daily Faction Balls Loaded")
-    print(f"✅ {status_rotator.is_running()} 👒 Status Rotator Running")
     print(f"✅ {startup_tasks.is_running()} 💄  Startup Tasks Running")
     pg_status = "Ready" if hasattr(bot, "pg_pool") else "Not Ready"
     print(f"✅ {pg_status} 🌺  PostgreSQL Pool")
