@@ -39,12 +39,12 @@ class CentralLoop(commands.Cog):
         )
         while not self.bot.is_closed():
             try:
-                pretty_log(
+                """pretty_log(
                     "",
                     "🔂 Running background checks...",
                     label="🍭 CENTRAL LOOP",
                     bot=self.bot,
-                )
+                )"""
 
                 # 🦭 Check if any user reminder is due
                 await process_due_reminders(self.bot)

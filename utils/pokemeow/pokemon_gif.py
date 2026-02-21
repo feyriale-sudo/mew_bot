@@ -2,10 +2,12 @@
 
 from typing import Literal
 
-from config.dex import get_dex_number_by_name
+
 from config.pokemon_gifs import *
 from utils.logs.debug_logs import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
+from utils.db.market_value_db_func import fetch_image_link_cache
+from utils.functions.pokemon_func import format_names_for_market_value_lookup, get_dex_number_by_name
 
 # enable_debug(f"{__name__}.get_pokemon_gif")
 hyphen_mon_names = [
@@ -19,8 +21,33 @@ hyphen_mon_names = [
 ]
 
 
+async def get_pokemon_gif(pokemon_name: str):
+    formatted_name = format_names_for_market_value_lookup(pokemon_name)
+    image_url = fetch_image_link_cache(formatted_name)
+    if not image_url:
+        pretty_log(
+            tag="info",
+            message=(
+                f"Image URL not found in cache for '{pokemon_name}' (formatted: '{formatted_name}')"
+            ),
+        )
+        # Fallback to fetching the GIF using the original name formatting
+        image_url = get_pokemon_gif_from_local_data(pokemon_name)
+        if not image_url:
+            pretty_log(
+                tag="info",
+                message=(
+                    f"Failed to fetch Pokémon GIF for '{pokemon_name}' using fallback method."
+                ),
+            )
+            return None
+        return image_url
+    else:
+        return image_url
+
+
 # made it async
-async def get_pokemon_gif(input_name: str):
+def get_pokemon_gif_from_local_data(input_name: str):
     """
     Returns the pokemon gif
     """
@@ -134,8 +161,9 @@ async def get_pokemon_gif(input_name: str):
             )
         else:
             if dex_number:
-                # Try the direct URL first
-                gif_url = f"https://graphics.tppcrpg.net/xy/golden/{dex_number}M.gif"
+                # Pad dex_number to 3 digits
+                padded_dex = str(dex_number).zfill(3)
+                gif_url = f"https://graphics.tppcrpg.net/xy/golden/{padded_dex}M.gif"
                 debug_log(f"Golden regular form: direct gif_url={gif_url}")
 
             else:

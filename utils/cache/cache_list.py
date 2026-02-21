@@ -133,3 +133,11 @@ auction_reminder_cache: dict[tuple[int, int], dict] = {}
 #     "user_name": str,
 #     "alarm_set": bool
 # }
+
+# 🌸──────────────────────────────────────────────
+#      🧩 Processed Messages🧩
+# ───────────────────────────────────────────────
+processed_market_feed_message_ids = set()
+processed_messages_list =[
+    processed_market_feed_message_ids
+]

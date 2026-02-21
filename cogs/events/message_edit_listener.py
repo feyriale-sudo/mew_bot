@@ -9,6 +9,7 @@ from discord.ext import commands
 
 from config.settings import *
 from utils.listener_func.auction_command_listener import auction_command_listener
+from utils.listener_func.dex_listener import dex_message_handler
 from utils.listener_func.faction_hunt_alert import faction_hunt_alert
 from utils.listener_func.fish_rarity_embed import fish_rarity_embed
 from utils.listener_func.quest_listener import handle_quest_complete_message
@@ -21,6 +22,7 @@ from utils.logs.pretty_log import pretty_log
 auction_command_trigger = "Auctions on this page"
 RARE_SPAWN_TRIGGERS = ["You caught a", "broke out of the", "ran away"]
 FISHING_COLOR = 0x87CEFA
+dex_trigger = ":dna: **Evolution line**"
 
 
 class MessageEditListener(commands.Cog):
@@ -150,6 +152,15 @@ class MessageEditListener(commands.Cog):
                 tag="critical",
                 message=f"Unhandled exception in on_message_edit: {e}",
             )
+
+            # 💖────────────────────────────────────────────
+            #           🧬 Dex Processing Only
+            # 💖────────────────────────────────────────────
+            if after.embeds and after.embeds[0]:
+                embed = after.embeds[0]
+                embed_description = embed.description
+                if embed_description and dex_trigger in embed_description:
+                    await dex_message_handler(self.bot, after)
 
 
 # 💜────────────────────────────────────────────
