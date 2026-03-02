@@ -233,34 +233,85 @@ async def update_market_alert(
 async def update_user_alerts_channel_or_role(
     bot,
     user_id: int,
+    user_name: str,
     channel_id: int = None,
-    role_id: int = None,
+    role_id: str = None,
 ):
     """
     Bulk update all alerts for a user to a new channel or role.
 
-    Only one or both of channel_id / role_id can be provided.
+    If role_id is "none" or None, alerts are reset (deleted and reinserted without role_id).
+    Otherwise, alerts are updated in place.
 
-    Returns the number of alerts updated.
+    Returns the number of alerts updated or reinserted.
     """
     if channel_id is None and role_id is None:
         raise ValueError("Must provide at least channel_id or role_id to update.")
 
-    set_clauses = []
-    values = []
-
-    if channel_id is not None:
-        set_clauses.append("channel_id = $1")
-        values.append(channel_id)
-    if role_id is not None:
-        set_clauses.append("role_id = $" + str(len(values) + 1))
-        values.append(role_id)
-
-    set_sql = ", ".join(set_clauses)
-    query = f"UPDATE market_alerts SET {set_sql} WHERE user_id=$" + str(len(values) + 1)
-    values.append(user_id)
-
     async with bot.pg_pool.acquire() as conn:
-        result = await conn.execute(query, *values)
+        async with conn.transaction():
+            # Special case: reset if role_id is "none" or None
+            if role_id is None or (
+                isinstance(role_id, str) and role_id.lower() == "none"
+            ):
+                # Fetch existing alerts so we can reinsert them
+                rows = await conn.fetch(
+                    """
+                    SELECT pokemon, dex_number, max_price, notify
+                    FROM market_alerts
+                    WHERE user_id=$1
+                    """,
+                    user_id,
+                )
 
-    return int(result.split()[-1])  # number of rows updated
+                # Delete old alerts
+                await conn.execute(
+                    "DELETE FROM market_alerts WHERE user_id=$1", user_id
+                )
+
+                # Reinsert without role_id
+                reinserted = 0
+                for row in rows:
+                    await conn.execute(
+                        """
+                        INSERT INTO market_alerts
+                        (user_id, user_name, pokemon, dex_number, max_price, channel_id, role_id, notify)
+                        VALUES ($1, $2, $3, $4, $5, $6, NULL, $7)
+                        """,
+                        user_id,
+                        user_name,
+                        row["pokemon"],
+                        row["dex_number"],
+                        row["max_price"],
+                        channel_id,
+                        row["notify"],
+                    )
+                    reinserted += 1
+                return reinserted
+
+            # Normal update path
+            set_clauses = []
+            values = []
+            param_idx = 1
+
+            if channel_id is not None:
+                set_clauses.append(f"channel_id = ${param_idx}")
+                values.append(channel_id)
+                param_idx += 1
+
+            if role_id is not None:
+                set_clauses.append(f"role_id = ${param_idx}")
+                values.append(int(role_id) if isinstance(role_id, str) else role_id)
+                param_idx += 1
+
+            # Always update user_name too
+            set_clauses.append(f"user_name = ${param_idx}")
+            values.append(user_name)
+            param_idx += 1
+
+            set_sql = ", ".join(set_clauses)
+            query = f"UPDATE market_alerts SET {set_sql} WHERE user_id=${param_idx}"
+            values.append(user_id)
+
+            result = await conn.execute(query, *values)
+            return int(result.split()[-1])  # number of rows updated

@@ -64,7 +64,11 @@ async def update_market_alert_role_channel_func(
     # ── Update database ──
     try:
         updated_count = await update_user_alerts_channel_or_role(
-            bot, user_id=user_id, channel_id=channel_id, role_id=role_id
+            bot,
+            user_id=user_id,
+            user_name=user.name,
+            channel_id=channel_id,
+            role_id=role_id,
         )
 
         update_user_alerts_in_cache(
