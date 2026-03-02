@@ -55,7 +55,7 @@ async def update_market_alert_role_channel_func(
     # ── Determine channel ID ──
     channel_id = channel.id if channel else None
 
-    if channel_id is None and role_id is None and role != "none":
+    if channel_id is None and role_id is None:
         await loader.error(
             content="You must provide at least a new channel or role to update."
         )
