@@ -22,7 +22,6 @@ from utils.db.market_value_db_func import set_market_value
 from utils.logs.pretty_log import pretty_log
 from utils.visuals.name_helpers import format_display_pokemon_name
 from utils.logs.debug_logs import debug_enabled, debug_log, enable_debug
-
 PokeCoin = Emojis.PokeCoin
 
 ALLOWED_WEBHOOKS = {
@@ -262,6 +261,7 @@ async def process_market_alert_message(
             # 💬 Compose message
             display_pokemon_name = format_display_pokemon_name(poke_name)
             poke_name = display_pokemon_name
+            role_mention = ""
             content = (
                 f"{role_mention} {poke_name} on market for {PokeCoin} {listed_price:,}"
             )

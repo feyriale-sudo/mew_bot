@@ -158,7 +158,7 @@ async def startup_tasks():
     if market_value_cache:
         await sync_market_cache_to_db(bot, market_value_cache)
         pretty_log(
-            tag="sync",
+            tag="sync", 
             message=f"Market cache synced ON STARTUP: {len(market_value_cache)} entries",
         )
     else:
